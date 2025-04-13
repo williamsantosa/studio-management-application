@@ -52,32 +52,32 @@
 		{
 			text: 'Students',
 			components: [
-				{ text: 'Profiles', href: '/profiles' },
-				{ text: 'Leadership', href: '/leadership' },
-				{ text: 'Tournaments', href: '/tournaments' },
-				{ text: 'Add Missing Class', href: '/addmissingclass' }
+				{ text: 'Profiles', href: '/students/profiles' },
+				{ text: 'Leadership', href: '/students/leadership' },
+				{ text: 'Tournaments', href: '/students/tournaments' },
+				{ text: 'Add Missing Class', href: '/students/addmissingclass' }
 			]
 		},
 		{
 			text: 'Classes',
 			components: [
-				{ text: 'Schedule', href: '/schedule' },
-				{ text: 'Edit Classes', href: '/editclasses' }
+				{ text: 'Schedule', href: '/classes/schedule' },
+				{ text: 'Edit Classes', href: '/classes/editclasses' }
 			]
 		},
 		{
 			text: 'Manage Studio',
 			components: [
-				{ text: 'Belt Requirements', href: '/beltrequirements' },
-				{ text: 'Print Student ID Card', href: '/printstudentcards' }
+				{ text: 'Belt Requirements', href: '/managestudio/beltrequirements' },
+				{ text: 'Print Student ID Card', href: '/managestudio/printstudentcards' }
 			]
 		},
 		{
 			text: 'Transactions',
 			components: [
-				{ text: 'Payments', href: '/payments' },
-				{ text: 'Refunds', href: '/refunds' },
-				{ text: 'Memberships', href: '/memberships' }
+				{ text: 'Payments', href: '/transactions/payments' },
+				{ text: 'Refunds', href: '/transactions/refunds' },
+				{ text: 'Memberships', href: '/transactions/memberships' }
 			]
 		},
 		{ text: 'Inventory', href: '/inventory' },
