@@ -1,12 +1,37 @@
-import "carbon-components-svelte/css/all.css";
+<script lang="ts">
+    // Assuming this component is part of an app where Carbon CSS is loaded globally
+    // import 'carbon-components-svelte/css/all.css'; // Usually in +layout.svelte
 
-<script>
-    let theme = $state("g100"); // "white" | "g10" | "g80" | "g90" | "g100"
+    // Example: If you want to place it within a Carbon grid
+	import { Grid, Row, Column } from 'carbon-components-svelte';
 
-    $effect(() => {
-        document.documentElement.setAttribute("theme", theme);
-    });
+    // --- Image Details ---
+    // Replace with the actual filename of your image within static/images/
+    const imageName = "KoosMartialArts.webp";
+    // IMPORTANT: Provide a meaningful description for accessibility
+    const imageAltText = "A descriptive caption for the image";
+
+    // Construct the public path
+    const imageSrc = `/images/${imageName}`;
+    // --------------
+
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<Grid fullWidth>
+    <Row>
+        <Column/>
+        <Column>
+            <h1>Image from Static Folder</h1>
+            <img
+                src={imageSrc}
+                alt={imageAltText}
+                style="max-width: 100%; height: auto; display: block; margin-top: 1rem;"
+                width="400"
+                height="300"
+             />
+
+             <p>Some text following the image.</p>
+        </Column>
+        <Column/>
+    </Row>
+</Grid>

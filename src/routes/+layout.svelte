@@ -9,12 +9,12 @@
 		HeaderUtilities,
 		HeaderGlobalAction,
 		SkipToContent,
-        SideNav,
-        SideNavItems,
-        SideNavMenu,
-        SideNavMenuItem,
-        SideNavLink,
-        SideNavDivider,
+		SideNav,
+		SideNavItems,
+		SideNavMenu,
+		SideNavMenuItem,
+		SideNavLink,
+		SideNavDivider,
 		Content,
 		Grid,
 		Row,
@@ -25,9 +25,9 @@
 	import UserAvatarFilledAlt from 'carbon-icons-svelte/lib/UserAvatarFilledAlt.svelte';
 
 	let username: string = $state('William Santosa');
-    let isSideNavOpen: boolean = $state(false);
-    let expandedByDefault: boolean = false;
-    
+	let isSideNavOpen: boolean = $state(false);
+	let expandedByDefault: boolean = false;
+
 	let {
 		children,
 		company = "Koo's Martial Arts",
@@ -43,56 +43,80 @@
 		document.documentElement.setAttribute('theme', theme);
 	});
 
-    let menu_components: Array<{text: string, href?: string, components?: Array<{text: string, href: string}>}> = [
-        {text: 'Class View', href: '/classview'},
-        {text: 'Students', components: [
-            {text: 'Profiles', href: '/profiles'},
-            {text: 'Leadership', href: '/leadership'},
-            {text: 'Tournaments', href: '/tournaments'},
-            {text: 'Add Class', href: '/addclass'}
-        ]},
-        {text: 'Classes', components: [
-            {text: 'Schedule', href: '/schedule'},
-            {text: 'Edit Classes', href: '/editclasses'}
-        ]},
-        {text: 'Inventory', href: '/inventory'},
-        {text: 'Transactions', href: '/transactions'},
-        {text: 'Logs', href: '/logs'}
-    ];
+	let menu_components: Array<{
+		text: string;
+		href?: string;
+		components?: Array<{ text: string; href: string }>;
+	}> = [
+		{ text: 'Class View', href: '/classview' },
+		{
+			text: 'Students',
+			components: [
+				{ text: 'Profiles', href: '/profiles' },
+				{ text: 'Leadership', href: '/leadership' },
+				{ text: 'Tournaments', href: '/tournaments' },
+				{ text: 'Add Missing Class', href: '/addmissingclass' }
+			]
+		},
+		{
+			text: 'Classes',
+			components: [
+				{ text: 'Schedule', href: '/schedule' },
+				{ text: 'Edit Classes', href: '/editclasses' }
+			]
+		},
+		{
+			text: 'Manage Studio',
+			components: [
+				{ text: 'Belt Requirements', href: '/beltrequirements' },
+				{ text: 'Print Student ID Card', href: '/printstudentcards' }
+			]
+		},
+		{
+			text: 'Transactions',
+			components: [
+				{ text: 'Payments', href: '/payments' },
+				{ text: 'Refunds', href: '/refunds' },
+				{ text: 'Memberships', href: '/memberships' }
+			]
+		},
+		{ text: 'Inventory', href: '/inventory' },
+		{ text: 'Logs', href: '/logs' }
+	];
 </script>
 
 <Header href="/" {company} {platformName} bind:isSideNavOpen {expandedByDefault}>
 	<svelte:fragment slot="skip-to-content">
 		<SkipToContent />
 	</svelte:fragment>
-    <HeaderNav>
-        {#each menu_components as {text, href, components}}
-            {#if components}
-                <HeaderNavMenu text={text}>
-                    {#each components as {text: componentText, href: componentHref}}
-                        <HeaderNavItem href={componentHref} text={componentText} />
-                    {/each}
-                </HeaderNavMenu>
-            {:else}
-                <HeaderNavItem href={href} text={text} />
-            {/if}
-        {/each}
-    </HeaderNav>
-    <SideNav bind:isOpen={isSideNavOpen}>
-        <SideNavItems>
-            {#each menu_components as {text, href, components}}
-                {#if components}
-                    <SideNavMenu text={text}>
-                        {#each components as {text: componentText, href: componentHref}}
-                            <SideNavMenuItem href={componentHref} text={componentText} />
-                        {/each}
-                    </SideNavMenu>
-                {:else}
-                    <SideNavLink href={href} text={text} />
-                {/if}
-            {/each}
-        </SideNavItems>
-      </SideNav>
+	<HeaderNav>
+		{#each menu_components as { text, href, components }}
+			{#if components}
+				<HeaderNavMenu {text}>
+					{#each components as { text: componentText, href: componentHref }}
+						<HeaderNavItem href={componentHref} text={componentText} />
+					{/each}
+				</HeaderNavMenu>
+			{:else}
+				<HeaderNavItem {href} {text} />
+			{/if}
+		{/each}
+	</HeaderNav>
+	<SideNav bind:isOpen={isSideNavOpen}>
+		<SideNavItems>
+			{#each menu_components as { text, href, components }}
+				{#if components}
+					<SideNavMenu {text}>
+						{#each components as { text: componentText, href: componentHref }}
+							<SideNavMenuItem href={componentHref} text={componentText} />
+						{/each}
+					</SideNavMenu>
+				{:else}
+					<SideNavLink {href} {text} />
+				{/if}
+			{/each}
+		</SideNavItems>
+	</SideNav>
 	<HeaderUtilities>
 		<HeaderGlobalAction iconDescription={username} icon={UserAvatarFilledAlt} />
 		<HeaderGlobalAction iconDescription="Settings" tooltipAlignment="start" icon={SettingsAdjust} />
