@@ -6,9 +6,15 @@
 		HeaderNav,
 		HeaderNavItem,
 		HeaderNavMenu,
-        HeaderUtilities,
-        HeaderGlobalAction,
+		HeaderUtilities,
+		HeaderGlobalAction,
 		SkipToContent,
+        SideNav,
+        SideNavItems,
+        SideNavMenu,
+        SideNavMenuItem,
+        SideNavLink,
+        SideNavDivider,
 		Content,
 		Grid,
 		Row,
@@ -18,12 +24,14 @@
 	import SettingsAdjust from 'carbon-icons-svelte/lib/SettingsAdjust.svelte';
 	import UserAvatarFilledAlt from 'carbon-icons-svelte/lib/UserAvatarFilledAlt.svelte';
 
-    let username: string = $state('William Santosa');
-
+	let username: string = $state('William Santosa');
+    let isSideNavOpen: boolean = $state(false);
+    let expandedByDefault: boolean = false;
+    
 	let {
 		children,
 		company = "Koo's Martial Arts",
-		platformName = '',
+		platformName = ''
 	}: {
 		children: () => any;
 		company?: string;
@@ -34,50 +42,70 @@
 	$effect(() => {
 		document.documentElement.setAttribute('theme', theme);
 	});
+
+    let menu_components: Array<{text: string, href?: string, components?: Array<{text: string, href: string}>}> = [
+        {text: 'Class View', href: '/classview'},
+        {text: 'Students', components: [
+            {text: 'Profiles', href: '/profiles'},
+            {text: 'Leadership', href: '/leadership'},
+            {text: 'Tournaments', href: '/tournaments'},
+            {text: 'Add Class', href: '/addclass'}
+        ]},
+        {text: 'Classes', components: [
+            {text: 'Schedule', href: '/schedule'},
+            {text: 'Edit Classes', href: '/editclasses'}
+        ]},
+        {text: 'Inventory', href: '/inventory'},
+        {text: 'Transactions', href: '/transactions'},
+        {text: 'Logs', href: '/logs'}
+    ];
 </script>
 
-<Header href="/" {company} {platformName}>
+<Header href="/" {company} {platformName} bind:isSideNavOpen {expandedByDefault}>
 	<svelte:fragment slot="skip-to-content">
 		<SkipToContent />
 	</svelte:fragment>
-	<HeaderNav>
-        <HeaderNavItem href="/classview" text="Class View" />
-        <HeaderNavMenu text="Students">
-            <HeaderNavItem href="/profile" text="Profiles" />
-			<HeaderNavItem href="/leadership" text="Leadership" />
-			<HeaderNavItem href="/tournament" text="Tournaments" />
-			<HeaderNavItem href="/addclass" text="Add Class" />
-		</HeaderNavMenu>
-        <HeaderNavMenu text="Classes">
-            <HeaderNavItem href="/schedule" text="Schedule" />
-			<HeaderNavItem href="/editclasses" text="Edit Classes" />
-		</HeaderNavMenu>
-        <HeaderNavItem href="/inventory" text="Inventory" />
-		<HeaderNavItem href="/transactions" text="Transactions" />
-        <HeaderNavItem href="/logs" text="Logs" />
-	</HeaderNav>
-    <HeaderUtilities>
-        <HeaderGlobalAction iconDescription={username} icon={UserAvatarFilledAlt} />
-        <HeaderGlobalAction
-          iconDescription="Settings"
-          tooltipAlignment="start"
-          icon={SettingsAdjust}
-        />
-        <HeaderGlobalAction
-          iconDescription="Log out"
-          tooltipAlignment="end"
-          icon={Logout}
-        />
-    </HeaderUtilities>
+    <HeaderNav>
+        {#each menu_components as {text, href, components}}
+            {#if components}
+                <HeaderNavMenu text={text}>
+                    {#each components as {text: componentText, href: componentHref}}
+                        <HeaderNavItem href={componentHref} text={componentText} />
+                    {/each}
+                </HeaderNavMenu>
+            {:else}
+                <HeaderNavItem href={href} text={text} />
+            {/if}
+        {/each}
+    </HeaderNav>
+    <SideNav bind:isOpen={isSideNavOpen}>
+        <SideNavItems>
+            {#each menu_components as {text, href, components}}
+                {#if components}
+                    <SideNavMenu text={text}>
+                        {#each components as {text: componentText, href: componentHref}}
+                            <SideNavMenuItem href={componentHref} text={componentText} />
+                        {/each}
+                    </SideNavMenu>
+                {:else}
+                    <SideNavLink href={href} text={text} />
+                {/if}
+            {/each}
+        </SideNavItems>
+      </SideNav>
+	<HeaderUtilities>
+		<HeaderGlobalAction iconDescription={username} icon={UserAvatarFilledAlt} />
+		<HeaderGlobalAction iconDescription="Settings" tooltipAlignment="start" icon={SettingsAdjust} />
+		<HeaderGlobalAction iconDescription="Log out" tooltipAlignment="end" icon={Logout} />
+	</HeaderUtilities>
 </Header>
 
 <Content>
-    <Grid fullWidth>
-        <Row>
-            <Column>
-                {@render children()}
-            </Column>
-        </Row>
-    </Grid>
+	<Grid fullWidth>
+		<Row>
+			<Column>
+				{@render children()}
+			</Column>
+		</Row>
+	</Grid>
 </Content>
-
