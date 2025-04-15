@@ -12,7 +12,7 @@
 		Column
 	} from 'carbon-components-svelte';
 
-	import { login, logout } from '$lib/pocketbase';
+	import { login } from '$lib/pocketbase';
 	import { goto } from '$app/navigation';
 
 	let identifier = $state('');

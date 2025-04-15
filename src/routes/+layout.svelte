@@ -24,6 +24,14 @@
 	import SettingsAdjust from 'carbon-icons-svelte/lib/SettingsAdjust.svelte';
 	import UserAvatarFilledAlt from 'carbon-icons-svelte/lib/UserAvatarFilledAlt.svelte';
 
+	import { logout } from '$lib/pocketbase';
+	import { goto } from '$app/navigation';
+
+	function handleLogout() {
+		logout();
+		goto('/'); // Redirect to login page after logout
+	}
+
 	let username: string = $state('William Santosa');
 	let isSideNavOpen: boolean = $state(false);
 	let expandedByDefault: boolean = false;
@@ -122,7 +130,7 @@
 	<HeaderUtilities>
 		<HeaderGlobalAction iconDescription={username} icon={UserAvatarFilledAlt} />
 		<HeaderGlobalAction iconDescription="Settings" tooltipAlignment="start" icon={SettingsAdjust} />
-		<HeaderGlobalAction iconDescription="Log out" tooltipAlignment="end" icon={Logout} />
+		<HeaderGlobalAction iconDescription="Log out" tooltipAlignment="end" icon={Logout} on:click={handleLogout}/>
 	</HeaderUtilities>
 </Header>
 

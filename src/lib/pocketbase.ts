@@ -67,6 +67,16 @@ export function logout() {
     console.log('Logged out');
 }
 
+export function getCurrentUser() {
+    // Return the current user record from the auth store
+    return pb.authStore.record;
+}
+
+export function isUserAuthenticated() {
+    // Check if the user is authenticated by checking the auth store's validity
+    return pb.authStore.isValid;
+}
+
 // --- Check initial auth state ---
 // Useful for debugging or initial setup
 // console.log('Initial PocketBase auth state:', {
