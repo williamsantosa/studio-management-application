@@ -6,20 +6,30 @@
         InlineLoading,
 		TextInput,
 		PasswordInput,
-		ButtonSet,
 		Button,
 		Grid,
 		Row,
 		Column
 	} from 'carbon-components-svelte';
 
-	let username = $state('');
+	import { login, logout } from '$lib/pocketbase';
+	import { goto } from '$app/navigation';
+
+	let identifier = $state('');
 	let password = $state('');
 	let isLoading = $state(false);
 	let errorMessage = $state('');
 	let successMessage = $state('');
 
-	async function handleSubmit() {
+	/**
+	 * Handles the form submission for login.
+	 * Calls the PocketBase login function.
+	 * Displays success or error messages and handles redirection.
+	 */
+	 async function handleSubmit(event: SubmitEvent) {
+		// Prevent default form submission
+		event.preventDefault();
+
 		if (isLoading) return; // Prevent multiple submissions
 
 		// Reset messages and set loading state
@@ -27,37 +37,30 @@
 		successMessage = '';
 		isLoading = true;
 
-		// console.log('Attempting login with:', { username, password });
+		console.log('Attempting PocketBase login with:', { identifier, password });
 
 		try {
-			// --- Simulate API Call ---
-			// Replace this with your actual fetch() call to your backend endpoint
-			await new Promise((resolve, reject) => {
-				setTimeout(() => {
-					// Basic validation example (in real app, backend does most validation)
-					if (!username || !password) {
-						reject(new Error('Please fill in both email and password.'));
-					} else if (password === 'password123' && username.includes('@')) {
-						// Simulate successful login
-						resolve('Login successful!');
-					} else {
-						// Simulate failed login
-						reject(new Error('Invalid email or password. Please try again.'));
-					}
-				}, 1500); // Simulate network delay
-			});
-			// --- End Simulation ---
+			// --- Call PocketBase Login ---
+			// Pass the identifier (username/email) and password
+			const authData = await login(identifier, password);
+			// --- End PocketBase Login ---
 
-			// If API call was successful
+			// If PocketBase login was successful
 			successMessage = 'Login successful! Redirecting...';
-			console.log('Login successful');
-			// TODO: Redirect user or update application state (e.g., using goto from $app/navigation)
-			// import { goto } from '$app/navigation';
-			// goto('/dashboard');
+			console.log('PocketBase Login successful, authData:', authData);
+
+			// Redirect user to a protected route (e.g., dashboard)
+			// Use await to ensure navigation is attempted before potentially finishing the function
+			await goto('/dashboard'); // <-- ADJUST '/dashboard' to your desired route
+
 		} catch (error: any) {
-			// If API call failed or validation error occurred
-			console.error('Login failed:', error);
-			errorMessage = error.message || 'An unexpected error occurred.';
+			// If PocketBase login failed
+			console.error('PocketBase Login failed:', error);
+			// PocketBase errors often have a user-friendly message in `error.message`
+			// or more details in `error.data.data` for validation errors
+			errorMessage = error.message || 'An unexpected error occurred during login.';
+            // You could add more specific error handling based on error.status if needed
+            // e.g., if (error.status === 400) { errorMessage = 'Invalid credentials.' }
 		} finally {
 			// Always turn off loading indicator
 			isLoading = false;
@@ -91,10 +94,10 @@
 			<Form on:submit={handleSubmit}>
 				<FormGroup>
 					<TextInput
-						bind:value={username}
-						labelText="Username"
-						placeholder="Enter Username"
-						type="username"
+						bind:value={identifier}
+						labelText="identifier"
+						placeholder="Enter identifier"
+						type="identifier"
 						required
 						disabled={isLoading}
 						invalid={!!errorMessage}

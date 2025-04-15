@@ -85,6 +85,8 @@
 	];
 </script>
 
+<!-- Header and Navigation -->
+<!-- Main header and navigation component for the application. Includes side navigation menu and top header with global actions. -->
 <Header href="/" {company} {platformName} bind:isSideNavOpen {expandedByDefault}>
 	<svelte:fragment slot="skip-to-content">
 		<SkipToContent />

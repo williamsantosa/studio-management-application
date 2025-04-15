@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS students (
     enrollment_date DATE DEFAULT CURRENT_DATE,
     status VARCHAR(20) DEFAULT 'active',
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Add columns only if they don't already exist
