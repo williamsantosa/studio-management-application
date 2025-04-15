@@ -27,7 +27,7 @@ Create first superuser
 
 Mount volume (it's a persistent file system that can be moved around to different servers)
 
-1. Create volume on Linode website, run the commands they suggest by pressing "show config" after pressing the 3 dots.
+1. Create volume on Linode website, run the commands they suggest by pressing "show config" afte prressing the 3 dots.
 2. Run `mount "dev/disk/..." "/root/pb/pb_data"`.
 
 Domains
