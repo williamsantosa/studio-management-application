@@ -14,7 +14,6 @@
 		SideNavMenu,
 		SideNavMenuItem,
 		SideNavLink,
-		SideNavDivider,
 		Content,
 		Grid,
 		Row,
