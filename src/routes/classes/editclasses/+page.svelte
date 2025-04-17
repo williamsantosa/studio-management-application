@@ -7,9 +7,14 @@
 		Toolbar,
 		ToolbarContent,
 		ToolbarBatchActions,
-		Button
+		Button,
+        Pagination
 	} from 'carbon-components-svelte';
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
+    import Edit from 'carbon-icons-svelte/lib/Edit.svelte';
+
+    let pageSize = $state(10);
+    let page = $state(1);
 
 	// const headers = 
 
@@ -66,48 +71,45 @@
 	let selectedRowIds: Array<Number> = $state([]);
 </script>
 
-{#await getClasses()}
-	<!-- Optional: Show a loading state -->
-	<p>Loading classes...</p>
-{:then classes}
-	<DataTable selectable batchSelection={active} bind:selectedRowIds {headers} {rows}>
-		<Toolbar>
-			<ToolbarBatchActions
-				bind:active
-				on:cancel={(e) => {
-					e.preventDefault();
-					active = false;
-				}}
-			>
-				<Button
-					icon={TrashCan}
-					disabled={selectedRowIds.length === 0}
-					on:click={() => {
-						rows = rows.filter((row: any) => !selectedRowIds.includes(Number(row.id)));
-						selectedRowIds = [];
-					}}
-				>
-					Delete
-				</Button>
-			</ToolbarBatchActions>
-			<ToolbarContent>
-				<Button on:click={() => (active = true)}>Edit rows</Button>
-			</ToolbarContent>
-		</Toolbar>
-	</DataTable>
-	<!-- Once resolved, iterate over the 'classes' array -->
-	{#each classes as classObject}
-		{console.log(classObject)}
-		<div class="class-card">
-			<h2>{classObject.name}</h2>
-			<p>{classObject.description}</p>
-		</div>
-	{/each}
-	<!-- Optional: Handle case where classes array is empty -->
-	{#if classes.length === 0}
-		<p>No classes found.</p>
-	{/if}
-{:catch error}
-	<!-- Optional: Show an error state -->
-	<p style="color: red;">Error loading classes: {error.message}</p>
-{/await}
+<DataTable selectable batchSelection={active} bind:selectedRowIds {headers} {rows} {pageSize} {page}>
+    <Toolbar>
+        <ToolbarBatchActions
+            bind:active
+            on:cancel={(e) => {
+                e.preventDefault();
+                active = false;
+            }}
+        >
+        <Button
+            icon={Edit}
+            disabled={selectedRowIds.length !== 1}
+            on:click={() => {
+                rows = rows.filter((row: any) => !selectedRowIds.includes(Number(row.id)));
+                selectedRowIds = [];
+            }}
+        >
+            Edit
+        </Button>
+            <Button
+                icon={TrashCan}
+                disabled={selectedRowIds.length === 0}
+                on:click={() => {
+                    rows = rows.filter((row: any) => !selectedRowIds.includes(Number(row.id)));
+                    selectedRowIds = [];
+                }}
+            >
+                Delete
+            </Button>
+        </ToolbarBatchActions>
+        <ToolbarContent>
+            <Button on:click={() => (active = true)}>Delete/Edit Row(s)</Button>
+        </ToolbarContent>
+    </Toolbar>
+</DataTable>
+
+<Pagination
+  bind:pageSize
+  bind:page
+  totalItems={data.summaries.length}
+  pageSizeInputDisabled
+/>
