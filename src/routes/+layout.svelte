@@ -1,6 +1,8 @@
 <script lang="ts">
+	// Styling
 	import 'carbon-components-svelte/css/all.css';
 
+	// Svelte imports
 	import {
 		Header,
 		HeaderNav,
@@ -19,22 +21,16 @@
 		Row,
 		Column
 	} from 'carbon-components-svelte';
+	import { goto } from '$app/navigation';
 	import Logout from 'carbon-icons-svelte/lib/Logout.svelte';
 	import SettingsAdjust from 'carbon-icons-svelte/lib/SettingsAdjust.svelte';
 	import UserAvatarFilledAlt from 'carbon-icons-svelte/lib/UserAvatarFilledAlt.svelte';
 
-	import { logout } from '$lib/pocketbase';
-	import { goto } from '$app/navigation';
+	// Local imports
+	import { currentUser, logout } from '$lib/pocketbase';
+	import { MenuComponents } from '$lib/datamodels/MenuComponents' 
 
-	function handleLogout() {
-		logout();
-		goto('/'); // Redirect to login page after logout
-	}
-
-	let username: string = $state('William Santosa');
-	let isSideNavOpen: boolean = $state(false);
-	let expandedByDefault: boolean = false;
-
+	// Get props from parent component
 	let {
 		children,
 		company = "Koo's Martial Arts",
@@ -45,51 +41,24 @@
 		platformName?: string;
 	} = $props();
 
+	// Set theme, default to 'g100'
 	let theme: 'white' | 'g10' | 'g80' | 'g90' | 'g100' = $state('g100');
 	$effect(() => {
 		document.documentElement.setAttribute('theme', theme);
 	});
 
-	let menu_components: Array<{
-		text: string;
-		href?: string;
-		components?: Array<{ text: string; href: string }>;
-	}> = [
-		{ text: 'Class View', href: '/classview' },
-		{
-			text: 'Students',
-			components: [
-				{ text: 'Profiles', href: '/students/profiles' },
-				{ text: 'Leadership', href: '/students/leadership' },
-				{ text: 'Tournaments', href: '/students/tournaments' },
-				{ text: 'Add Missing Class', href: '/students/addmissingclass' }
-			]
-		},
-		{
-			text: 'Classes',
-			components: [
-				{ text: 'Schedule', href: '/classes/schedule' },
-				{ text: 'Edit Classes', href: '/classes/editclasses' }
-			]
-		},
-		{
-			text: 'Manage Studio',
-			components: [
-				{ text: 'Belt Requirements', href: '/managestudio/beltrequirements' },
-				{ text: 'Print Student ID Card', href: '/managestudio/printstudentcards' }
-			]
-		},
-		{
-			text: 'Transactions',
-			components: [
-				{ text: 'Payments', href: '/transactions/payments' },
-				{ text: 'Refunds', href: '/transactions/refunds' },
-				{ text: 'Memberships', href: '/transactions/memberships' }
-			]
-		},
-		{ text: 'Inventory', href: '/inventory' },
-		{ text: 'Logs', href: '/logs' }
-	];
+	// Set up state variables
+	let userName: string = $derived($currentUser ? ($currentUser?.name || 'No Name Provided') : 'Guest');
+	let isSideNavOpen: boolean = $state(false);
+	let expandedByDefault: boolean = false;
+
+	// --- Functions ---
+	function handleLogout() {
+		$state.snapshot($currentUser);
+		logout();
+		goto('/'); // Redirect to login page after logout
+		$state.snapshot($currentUser);
+	}
 </script>
 
 <!-- Header and Navigation -->
@@ -99,7 +68,7 @@
 		<SkipToContent />
 	</svelte:fragment>
 	<HeaderNav>
-		{#each menu_components as { text, href, components }}
+		{#each MenuComponents as { text, href, components }}
 			{#if components}
 				<HeaderNavMenu {text}>
 					{#each components as { text: componentText, href: componentHref }}
@@ -113,7 +82,7 @@
 	</HeaderNav>
 	<SideNav bind:isOpen={isSideNavOpen}>
 		<SideNavItems>
-			{#each menu_components as { text, href, components }}
+			{#each MenuComponents as { text, href, components }}
 				{#if components}
 					<SideNavMenu {text}>
 						{#each components as { text: componentText, href: componentHref }}
@@ -127,9 +96,14 @@
 		</SideNavItems>
 	</SideNav>
 	<HeaderUtilities>
-		<HeaderGlobalAction iconDescription={username} icon={UserAvatarFilledAlt} />
+		<HeaderGlobalAction iconDescription={userName} icon={UserAvatarFilledAlt} />
 		<HeaderGlobalAction iconDescription="Settings" tooltipAlignment="start" icon={SettingsAdjust} />
-		<HeaderGlobalAction iconDescription="Log out" tooltipAlignment="end" icon={Logout} on:click={handleLogout}/>
+		<HeaderGlobalAction
+			iconDescription="Log out"
+			tooltipAlignment="end"
+			icon={Logout}
+			on:click={handleLogout}
+		/>
 	</HeaderUtilities>
 </Header>
 

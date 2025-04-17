@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { addClass, getClasses, deleteClass } from '$lib/pocketbase';
-	let { data } = $props();
-
+	// Svelte imports
 	import {
 		DataTable,
 		Toolbar,
@@ -19,54 +17,22 @@
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
 	import Edit from 'carbon-icons-svelte/lib/Edit.svelte';
 
-	let pageSize = $state(10);
-	let page = $state(1);
+	// Local imports
+	import { 
+		getClasses,
+		addClass,
+		deleteClass
+	} from '$lib/pocketbase';
+	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
+	
+	// Get data from server
+	let { data } = $props();
 
-	// const headers =
+	// Initialize headers and rows
+	let headers = ClassesHeaders;
 
-	type DataTableHeader<T> = {
-		key: keyof T;
-		value: string;
-	};
-
-	const headers:
-		| DataTableHeader<{
-				id: number;
-				name: string;
-				description: string;
-				schedule: string;
-				startTime: string;
-				endTime: string;
-		  }>[]
-		| undefined = [
-		{ key: 'id', value: 'ID' },
-		{ key: 'name', value: 'Name' },
-		{ key: 'description', value: 'Description' },
-		{ key: 'schedule', value: 'Schedule' },
-		{ key: 'startTime', value: 'StartTime' },
-		{ key: 'endTime', value: 'EndTime' }
-	];
-
-	// let rows = $state([
-	// 	{
-	// 		id: 1,
-	// 		name: 'Class 1',
-	// 		description: 'Description 1',
-	// 		schedule: 'Monday',
-	// 		startTime: '10:00 AM',
-	// 		endTime: '11:00 AM'
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		name: 'Class 2',
-	// 		description: 'Description 2',
-	// 		schedule: 'Tuesday',
-	// 		startTime: '11:00 AM',
-	// 		endTime: '12:00 PM'
-	// 	}
-	// ]);
-    
-    let tableData: any = $state(data.summaries);
+	// Initialize table data and rows
+    let tableData: any = $state(data.classes);
 	let rows: any = $derived(
 		tableData.map((classObject: any) => ({
 			id: classObject.id,
@@ -78,10 +44,14 @@
 		}))
 	);
 
+	// Table variables
+	let pageSize = $state(10);
+	let page = $state(1);
 	let active: boolean = $state(false);
 	let selectedRowIds: Array<Number> = $state([]);
 
-    let currentValue: any = $state({
+	// Form variables
+    let addClassFormVariables: any = $state({
         name: '',
         description: '',
         schedule: '',
@@ -89,18 +59,28 @@
         endTime: ''
     });
 
+	// --- Functions ---
+
+	/***
+	 * Handle form submission for adding a class
+	 * @param event - The form submission event
+	 */
 	async function handleAddClassSubmit(event: SubmitEvent) {
 		// Prevent default form submission
 		event.preventDefault();
-        $state.snapshot(`Attempting to add class with: ${currentValue}`);
+        $state.snapshot(`Attempting to add class with: ${addClassFormVariables}`);
 		try {
-            await addClass(currentValue);
+            await addClass(addClassFormVariables);
             tableData = await getClasses();
 		} catch (error: any) {
 		} finally {
 		}
 	}
 
+	/***
+	 * Handle form submission for deleting a class
+	 * * @param event - The form submission event
+	 */
     async function handleDeleteClassOnClick(event: MouseEvent) {
         // Prevent default form submission
         event.preventDefault();
@@ -172,7 +152,7 @@
 			<Row>
 				{#each headers.filter((h) => h.key !== 'id') as header}
 					<Column>
-						<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={currentValue[header.key]}/>
+						<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={addClassFormVariables[header.key]}/>
 					</Column>
 				{/each}
 			</Row>
