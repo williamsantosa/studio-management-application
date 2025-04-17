@@ -1,4 +1,5 @@
-import PocketBase from 'pocketbase';
+import PocketBase, { type CollectionModel } from 'pocketbase';
+
 import { writable } from 'svelte/store';
 
 // Initialize PocketBase instance
@@ -75,6 +76,14 @@ export function getCurrentUser() {
 export function isUserAuthenticated() {
     // Check if the user is authenticated by checking the auth store's validity
     return pb.authStore.isValid;
+}
+
+// Schedules
+
+export async function getClasses() {
+    return await pb.collection('classes').getFullList({
+        sort: '-created',
+    });
 }
 
 // --- Check initial auth state ---
