@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getClasses } from '$lib/pocketbase';
+    let { data } = $props();
 
 	import {
 		DataTable,
@@ -32,25 +33,34 @@
 		{ key: 'startTime', value: 'StartTime' },
 		{ key: 'endTime', value: 'EndTime' }
 	];
-	
-	let rows = $state([
-		{
-			id: 1,
-			name: 'Class 1',
-			description: 'Description 1',
-			schedule: 'Monday',
-			startTime: '10:00 AM',
-			endTime: '11:00 AM'
-		},
-		{
-			id: 2,
-			name: 'Class 2',
-			description: 'Description 2',
-			schedule: 'Tuesday',
-			startTime: '11:00 AM',
-			endTime: '12:00 PM'
-		}
-	]);
+    
+    // let rows = $state([
+	// 	{
+	// 		id: 1,
+	// 		name: 'Class 1',
+	// 		description: 'Description 1',
+	// 		schedule: 'Monday',
+	// 		startTime: '10:00 AM',
+	// 		endTime: '11:00 AM'
+	// 	},
+	// 	{
+	// 		id: 2,
+	// 		name: 'Class 2',
+	// 		description: 'Description 2',
+	// 		schedule: 'Tuesday',
+	// 		startTime: '11:00 AM',
+	// 		endTime: '12:00 PM'
+	// 	}
+	// ]);
+
+    let rows: any = $state(data.summaries.map((classObject: any) => ({
+        id: classObject.id,
+        name: classObject.name,
+        description: classObject.description,
+        schedule: classObject.schedule,
+        startTime: classObject.startTime,
+        endTime: classObject.endTime
+    })));
 
 	let active: boolean = $state(false);
 	let selectedRowIds: Array<Number> = $state([]);
@@ -73,7 +83,7 @@
 					icon={TrashCan}
 					disabled={selectedRowIds.length === 0}
 					on:click={() => {
-						rows = rows.filter((row) => !selectedRowIds.includes(Number(row.id)));
+						rows = rows.filter((row: any) => !selectedRowIds.includes(Number(row.id)));
 						selectedRowIds = [];
 					}}
 				>
