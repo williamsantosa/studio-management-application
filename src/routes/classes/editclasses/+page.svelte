@@ -8,7 +8,13 @@
 		ToolbarContent,
 		ToolbarBatchActions,
 		Button,
-        Pagination
+        Pagination,
+        Grid,
+        Row,
+        Column,
+        Form,
+        FormGroup,
+        TextInput
 	} from 'carbon-components-svelte';
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
     import Edit from 'carbon-icons-svelte/lib/Edit.svelte';
@@ -71,6 +77,12 @@
 	let selectedRowIds: Array<Number> = $state([]);
 </script>
 
+
+
+
+
+<h3 style="display: block; margin-top: 1rem; margin-bottom: 1rem; text-align: center; ">Classes</h3>
+
 <DataTable selectable batchSelection={active} bind:selectedRowIds {headers} {rows} {pageSize} {page}>
     <Toolbar>
         <ToolbarBatchActions
@@ -112,4 +124,21 @@
   bind:page
   totalItems={data.summaries.length}
   pageSizeInputDisabled
-/>
+/> 
+
+<h3 style="display: block; margin-top: 1rem; margin-bottom: 1rem; text-align: center; ">Add Class</h3>
+
+<Grid fullWidth>
+    <Form action="/classes/editclasses" method="POST">
+        <FormGroup>
+            <Row>
+            {#each headers.filter(h => h.key !== 'id') as header}
+                <Column>
+                <TextInput id={header.key} labelText={header.value} name={header.key} required />
+                </Column>
+            {/each}
+            </Row>
+        </FormGroup>
+        <Button type="submit">Add Class</Button>
+    </Form>
+</Grid>
