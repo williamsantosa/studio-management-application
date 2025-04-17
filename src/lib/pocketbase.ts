@@ -116,6 +116,25 @@ export async function addClass(classData: ClassData): Promise<RecordModel> {
     }
 }
 
+export async function deleteClass(classId: string): Promise<void> {
+    try {
+        // Ensure the classId is provided
+        if (!classId) {
+            throw new Error('Class ID is required for deletion.');
+        }
+
+        // Call PocketBase SDK's delete method for the 'classes' collection
+        await pb.collection('classes').delete(classId);
+
+        console.log(`Class with ID ${classId} deleted successfully.`);
+    } catch (error: any) {
+        console.error('Failed to delete class:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
+}
+
 // --- End Schedules / Classes ---
 
 

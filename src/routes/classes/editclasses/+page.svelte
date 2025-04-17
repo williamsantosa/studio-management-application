@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { addClass, getClasses } from '$lib/pocketbase';
+	import { addClass, getClasses, deleteClass } from '$lib/pocketbase';
 	let { data } = $props();
 
 	import {
@@ -100,6 +100,21 @@
 		} finally {
 		}
 	}
+
+    async function handleDeleteClassOnClick(event: MouseEvent) {
+        // Prevent default form submission
+        event.preventDefault();
+        $state.snapshot(`Attempting to delete class with: ${selectedRowIds}`);
+        try {
+            selectedRowIds.forEach(async (selectedRowId: any) => {
+                await deleteClass(selectedRowId);
+            });
+			selectedRowIds = [];
+            tableData = await getClasses();
+        } catch (error: any) {
+        } finally {
+        }
+    }
 </script>
 
 <h3 style="display: block; margin-top: 1rem; margin-bottom: 1rem; text-align: center; ">Classes</h3>
@@ -134,10 +149,7 @@
 			<Button
 				icon={TrashCan}
 				disabled={selectedRowIds.length === 0}
-				on:click={() => {
-					rows = rows.filter((row: any) => !selectedRowIds.includes(Number(row.id)));
-					selectedRowIds = [];
-				}}
+				on:click={(event) => {handleDeleteClassOnClick(event)}}
 			>
 				Delete
 			</Button>
