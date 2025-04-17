@@ -1,21 +1,17 @@
-import PocketBase, { type CollectionModel } from 'pocketbase';
-
+import PocketBase, { type CollectionModel, type RecordModel } from 'pocketbase';
 import { writable } from 'svelte/store';
 
 // Initialize PocketBase instance
-export const pb = new PocketBase('http://45.33.55.97');
+export const pb = new PocketBase('http://45.33.55.97'); // Replace with your PB instance URL
 
-// Create a writable store for the current user record
-// Initialize it with the current value from PocketBase's authStore.record
-// pb.authStore.record holds the authenticated user record object, or null/undefined if not authenticated.
+// --- Auth Store Setup ---
 export const currentUser = writable(pb.authStore.record);
-
-// Subscribe to PocketBase's auth store changes
-// This event fires whenever the auth state changes (login, logout, token refresh)
 pb.authStore.onChange((token, record) => {
     console.log('PocketBase authStore changed:', { token, record });
     currentUser.set(record);
-}, true); // Passing 'true' as the second argument executes the callback immediately with the current state
+}, true);
+
+// --- Auth Functions ---
 
 /**
  * Authenticates a user with email and password.
@@ -25,14 +21,11 @@ pb.authStore.onChange((token, record) => {
  */
 export async function login(identifier: string, password: string): Promise<import('pocketbase').RecordAuthResponse<any>> {
     try {
-        // Use authWithPassword which updates pb.authStore internally
         const authData = await pb.collection('users').authWithPassword(identifier, password);
-        // The onChange handler above will automatically update the currentUser store
         console.log('Login successful:', authData);
         return authData;
     } catch (error) {
         console.error("Login failed:", error);
-        // Re-throw the error for component-level handling
         throw error;
     }
 }
@@ -43,12 +36,8 @@ export async function login(identifier: string, password: string): Promise<impor
  */
 export async function loginWithProvider(providerName: string) {
     try {
-        // Use authWithOAuth2 which updates pb.authStore internally after redirect
         const authData = await pb.collection('users').authWithOAuth2({ provider: providerName });
-        // If successful (after redirect), the onChange handler will update currentUser
         console.log('OAuth2 login initiated/completed:', authData);
-        // Note: For OAuth2, the page usually redirects. The state update happens *after* the redirect back to your app.
-        // The initial call might return metadata for the redirect URL.
         return authData;
     } catch (error) {
         console.error(`OAuth2 login with ${providerName} failed:`, error);
@@ -56,38 +45,81 @@ export async function loginWithProvider(providerName: string) {
     }
 }
 
-
 /**
  * Logs out the current user.
  */
 export function logout() {
-    console.log(`Logging out (${pb.authStore.record})...`);
-    // clear() clears the auth store (token and record)
+    console.log(`Logging out (${pb.authStore.record?.id})...`);
     pb.authStore.clear();
-    // The onChange handler above will automatically update the currentUser store (setting it to null/undefined)
     console.log('Logged out');
 }
 
 export function getCurrentUser() {
-    // Return the current user record from the auth store
     return pb.authStore.record;
 }
 
 export function isUserAuthenticated() {
-    // Check if the user is authenticated by checking the auth store's validity
     return pb.authStore.isValid;
 }
 
-// Schedules
 
-export async function getClasses() {
+// --- Schedules / Classes ---
+
+/**
+ * Retrieves a full list of classes.
+ * @returns {Promise<RecordModel[]>} A promise that resolves to an array of class records.
+ */
+export async function getClasses(): Promise<RecordModel[]> {
+    // Consider adding options like filter or expand if needed
     return await pb.collection('classes').getFullList({
-        sort: '-created',
+        sort: '-created', // Example sort
     });
 }
 
+// --- Define the data structure for creating a class ---
+export interface ClassData {
+    name: string; 
+    description?: string; 
+    schedule?: string;
+    startDate?: string; 
+    endDate?: string; 
+}
+
+/**
+ * Creates a new class record in the 'classes' collection.
+ * Requires authentication and appropriate permissions set in PocketBase.
+ * @param {ClassData} classData - The data for the new class.
+ * @returns {Promise<RecordModel>} The newly created class record.
+ * @throws {Error} Throws an error if the creation fails (e.g., validation, permission).
+ */
+export async function addClass(classData: ClassData): Promise<RecordModel> {
+    try {
+        // Ensure required fields are provided (basic client-side check)
+        if (!classData.name) {
+            throw new Error('Class name is required.');
+        }
+
+        // Call PocketBase SDK's create method for the 'classes' collection
+        // This assumes the logged-in user has 'create' permissions for the 'classes' collection
+        const newRecord = await pb.collection('classes').create(classData);
+
+        console.log('Class added successfully:', newRecord);
+        return newRecord; // Return the newly created record object
+    } catch (error: any) {
+        console.error('Failed to add class:', error);
+        // It's often helpful to log the full PocketBase error structure
+        console.error('PocketBase error details:', error.data);
+        // Re-throw the error so the calling component can handle it (e.g., display UI message)
+        // You might want to process the error message here before re-throwing
+        // e.g., throw new Error(error.data?.message || 'Failed to add class due to an unknown error.');
+        throw error;
+    }
+}
+
+// --- End Schedules / Classes ---
+
+
 // --- Check initial auth state ---
-// Useful for debugging or initial setup
 // console.log('Initial PocketBase auth state:', {
 //     isValid: pb.authStore.isValid,
 //     token: pb.authStore.token,
