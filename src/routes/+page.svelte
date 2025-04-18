@@ -1,4 +1,5 @@
 <script lang="ts">
+	// Svelte imports
 	import {
 		Form,
 		FormGroup,
@@ -11,15 +12,22 @@
 		Row,
 		Column
 	} from 'carbon-components-svelte';
-
-	import { login, isUserAuthenticated } from '$lib/pocketbase';
 	import { goto } from '$app/navigation';
 
+	// Local imports
+	import { login, isUserAuthenticated } from '$lib/pocketbase';
+	
+	// Local variables
 	let identifier = $state('');
 	let password = $state('');
 	let isLoading = $state(false);
 	let errorMessage = $state('');
 	let successMessage = $state('');
+
+	// --- Image Details ---
+	const imageName = 'KoosMartialArts.webp';
+	const imageAltText = 'A descriptive caption for the image';
+	const imageSrc = `/images/${imageName}`;
 
 	// If authenticated then move to class view default
 	$effect(() => {
@@ -28,6 +36,7 @@
 		}
 	});
 
+	// --- Functions ---
 
 	/**
 	 * Handles the form submission for login.
@@ -45,40 +54,25 @@
 		successMessage = '';
 		isLoading = true;
 
+		// Login attempt
 		console.log('Attempting PocketBase login with:', { identifier, password });
-
 		try {
-			// --- Call PocketBase Login ---
-			// Pass the identifier (username/email) and password
+			// Call the login function from PocketBase
 			const authData = await login(identifier, password);
-			// --- End PocketBase Login ---
-
-			// If PocketBase login was successful
+			
+			// Check if the login was successful
 			successMessage = 'Login successful! Redirecting...';
 			console.log('PocketBase Login successful, authData:', authData);
-
-			// Redirect user to a protected route (e.g., dashboard)
-			// Use await to ensure navigation is attempted before potentially finishing the function
-			await goto('/dashboard'); // <-- ADJUST '/dashboard' to your desired route
-
+			
+			// Redirect to the class view page
+			await goto('/classview');
 		} catch (error: any) {
-			// If PocketBase login failed
 			console.error('PocketBase Login failed:', error);
-			// PocketBase errors often have a user-friendly message in `error.message`
-			// or more details in `error.data.data` for validation errors
 			errorMessage = error.message || 'An unexpected error occurred during login.';
-            // You could add more specific error handling based on error.status if needed
-            // e.g., if (error.status === 400) { errorMessage = 'Invalid credentials.' }
 		} finally {
-			// Always turn off loading indicator
 			isLoading = false;
 		}
 	}
-
-	// --- Image Details ---
-	const imageName = 'KoosMartialArts.webp';
-	const imageAltText = 'A descriptive caption for the image';
-	const imageSrc = `/images/${imageName}`;
 </script>
 
 {#if isLoading }
