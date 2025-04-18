@@ -27,14 +27,14 @@ export const MenuComponents: Array<{
             { text: 'Print Student ID Card', href: '/managestudio/printstudentcards' }
         ]
     },
-    {
-        text: 'Transactions',
-        components: [
-            { text: 'Payments', href: '/transactions/payments' },
-            { text: 'Refunds', href: '/transactions/refunds' },
-            { text: 'Memberships', href: '/transactions/memberships' }
-        ]
-    },
+    // {
+    //     text: 'Transactions',
+    //     components: [
+    //         { text: 'Payments', href: '/transactions/payments' },
+    //         { text: 'Refunds', href: '/transactions/refunds' },
+    //         { text: 'Memberships', href: '/transactions/memberships' }
+    //     ]
+    // },
     { text: 'Inventory', href: '/inventory' },
     { text: 'Logs', href: '/logs' }
 ];
