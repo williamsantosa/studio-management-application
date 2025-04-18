@@ -6,7 +6,7 @@
 	import { Button, Grid, Row, Column, DataTable } from 'carbon-components-svelte';
 	import ChevronLeft from 'carbon-icons-svelte/lib/ChevronLeft.svelte';
 	import ChevronRight from 'carbon-icons-svelte/lib/ChevronRight.svelte';
-	import { getClassesStartingOn } from '$lib/pocketbase.js';
+	import { getClassesStartingOn, toPSTTimeString } from '$lib/pocketbase.js';
 	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
 
 	// --- Types ---
@@ -34,8 +34,8 @@
             name: classObject.name,
             description: classObject.description,
             schedule: classObject.schedule,
-            startTime: classObject.startTime,
-            endTime: classObject.endTime
+			startTime: classObject.startTime ? toPSTTimeString(classObject.startTime) : '',
+			endTime: classObject.endTime ? toPSTTimeString(classObject.endTime) : ''
         }))
     );
 
@@ -193,7 +193,7 @@
         <Column lg={11}>
             <h3 style="text-align: center; margin-top: 0.5rem; margin-bottom: 1rem;">Schedule</h3>
             <DataTable
-                {headers}
+                headers={headers.filter(header => header.key !== 'day')}
                 {rows}
                 />
         </Column>
