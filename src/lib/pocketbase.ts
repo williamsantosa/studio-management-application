@@ -135,6 +135,29 @@ export async function deleteClass(classId: string): Promise<void> {
     }
 }
 
+export async function updateClass(classId: string, classData: ClassData): Promise<RecordModel> {
+    try {
+        // Ensure the classId and classData are provided
+        if (!classId) {
+            throw new Error('Class ID is required for update.');
+        }
+        if (!classData.name) {
+            throw new Error('Class name is required for update.');
+        }
+
+        // Call PocketBase SDK's update method for the 'classes' collection
+        const updatedRecord = await pb.collection('classes').update(classId, classData);
+
+        console.log('Class updated successfully:', updatedRecord);
+        return updatedRecord; // Return the updated record object
+    } catch (error: any) {
+        console.error('Failed to update class:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
+}
+
 // --- End Schedules / Classes ---
 
 

@@ -21,7 +21,8 @@
 	import { 
 		getClasses,
 		addClass,
-		deleteClass
+		deleteClass,
+		updateClass
 	} from '$lib/pocketbase';
 	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
 	
@@ -53,6 +54,16 @@
 	// Form variables
     let addClassFormVariables: any = $state({
         name: '',
+        description: '',
+        schedule: '',
+        startTime: '',
+        endTime: ''
+    });
+
+	// Form variables
+    let editClassFormVariables: any = $state({
+        id: '',
+		name: '',
         description: '',
         schedule: '',
         startTime: '',
@@ -95,6 +106,22 @@
         } finally {
         }
     }
+
+	/***
+	 * Handle form submission for editing a class
+	 * * @param event - The form submission event
+	 */
+	async function handleEditClassSubmit(event: SubmitEvent) {
+		// Prevent default form submission
+		event.preventDefault();
+		$state.snapshot(`Attempting to edit class with: ${editClassFormVariables}`);
+		try {
+			await updateClass(editClassFormVariables.id,editClassFormVariables);
+			tableData = await getClasses();
+		} catch (error: any) {
+		} finally {
+		}
+	}
 </script>
 
 <h3 style="display: block; margin-top: 1rem; margin-bottom: 1rem; text-align: center; ">Classes</h3>
@@ -119,9 +146,15 @@
 			<Button
 				icon={Edit}
 				disabled={selectedRowIds.length !== 1}
-				on:click={() => {
-					rows = rows.filter((row: any) => !selectedRowIds.includes(Number(row.id)));
-					selectedRowIds = [];
+				on:click={(e) => {
+					editClassFormVariables.id = selectedRowIds[0];
+					editClassFormVariables.name = rows.find((row: any) => row.id === selectedRowIds[0]).name;
+					editClassFormVariables.description = rows.find((row: any) => row.id === selectedRowIds[0]).description;
+					editClassFormVariables.schedule = rows.find((row: any) => row.id === selectedRowIds[0]).schedule;
+					editClassFormVariables.startTime = rows.find((row: any) => row.id === selectedRowIds[0]).startTime;
+					editClassFormVariables.endTime = rows.find((row: any) => row.id === selectedRowIds[0]).endTime;
+					e.preventDefault();
+					active = false;
 				}}
 			>
 				Edit
@@ -140,23 +173,36 @@
 	</Toolbar>
 </DataTable>
 
-<Pagination bind:pageSize bind:page totalItems={tableData.length} pageSizeInputDisabled />
+<Pagination style="margin-bottom: 2rem;" bind:pageSize bind:page totalItems={tableData.length} pageSizeInputDisabled />
 
-<h3 style="display: block; margin-top: 1rem; margin-bottom: 1rem; text-align: center; ">
-	Add Class
-</h3>
+<Grid fullWidth>
+	<Form action="/classes/editclasses" method="POST" on:submit={handleEditClassSubmit}>
+		<FormGroup>
+			<Row>
+				{#each headers as header}
+					<Column>
+						<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={editClassFormVariables[header.key]}/>
+					</Column>
+				{/each}
+				<Button style="margin-top: 1rem;" type="submit">Edit Class</Button>
+			</Row>
+		</FormGroup>
+	</Form>
+</Grid>
 
 <Grid fullWidth>
 	<Form action="/classes/editclasses" method="POST" on:submit={handleAddClassSubmit}>
 		<FormGroup>
 			<Row>
+				<Column/>
 				{#each headers.filter((h) => h.key !== 'id') as header}
 					<Column>
 						<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={addClassFormVariables[header.key]}/>
 					</Column>
 				{/each}
+				<Button style="margin-top: 1rem;" type="submit">Add Class</Button>
 			</Row>
 		</FormGroup>
-		<Button type="submit">Add Class</Button>
 	</Form>
 </Grid>
+
