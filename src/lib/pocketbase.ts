@@ -158,6 +158,64 @@ export async function updateClass(classId: string, classData: ClassData): Promis
     }
 }
 
+/**
+ * Retrieves a full list of classes that start on a specific date.
+ * Assumes the 'classes' collection has a 'startDate' field (Date or DateTime).
+ * Filters for classes starting between 00:00:00 and 23:59:59 on the given date (UTC).
+ *
+ * @param {Date} targetDate - The specific date to filter classes by.
+ * @returns {Promise<RecordModel[]>} A promise that resolves to an array of class records starting on that date.
+ * @throws {Error} Throws an error if the retrieval fails or the date is invalid.
+ */
+export async function getClassesStartingOn(targetDate: Date): Promise<RecordModel[]> {
+    try {
+        // Basic validation for the input date
+        if (!(targetDate instanceof Date) || isNaN(targetDate.getTime())) {
+            throw new Error('Invalid target date provided.');
+        }
+
+        const dateString = formatDateToYYYYMMDD(targetDate);
+
+        // --- Filter construction ---
+        // This filter works for DateTime fields by checking the entire day range.
+        // PocketBase filter syntax requires quotes around date/string values.
+        const filterString = `startTime >= "${dateString} 00:00:00.000Z" && startTime <= "${dateString} 23:59:59.000Z"`;
+
+        // --- Alternative filter for Date-only fields ---
+        // If your 'startDate' field ONLY stores the date (no time), use this simpler filter:
+        // const filterString = `startDate = "${dateString}"`;
+
+        console.log(`Fetching classes with filter: ${filterString}`);
+
+        const records = await pb.collection('classes').getFullList({
+            filter: filterString,
+            sort: '-created', // Optional: Keep sorting consistent or adjust as needed
+            // Add other options like 'expand' if required
+        });
+
+        console.log(`Found ${records.length} classes starting on ${dateString}`);
+        return records;
+
+    } catch (error: any) {
+        console.error(`Failed to get classes starting on ${targetDate.toDateString()}:`, error);
+        // Log PocketBase specific errors if available
+        if (error.data) {
+            console.error('PocketBase error details:', error.data);
+        }
+        throw error; // Re-throw the error for the caller to handle
+    }
+}
+
+/**
+ * Formats a Date object into 'YYYY-MM-DD' string format (UTC).
+ * @param {Date} date - The date object to format.
+ * @returns {string} The date string in 'YYYY-MM-DD' format.
+ */
+function formatDateToYYYYMMDD(date: Date): string {
+    // Ensures the date is treated as UTC for consistency with PocketBase storage
+	return date.toISOString().split('T')[0];
+}
+
 // --- End Schedules / Classes ---
 
 

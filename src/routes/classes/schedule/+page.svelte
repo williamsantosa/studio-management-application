@@ -3,9 +3,11 @@
 	import 'carbon-components-svelte/css/all.css';
 
 	// Carbon Component Imports
-	import { Button, Grid, Row, Column } from 'carbon-components-svelte';
+	import { Button, Grid, Row, Column, DataTable } from 'carbon-components-svelte';
 	import ChevronLeft from 'carbon-icons-svelte/lib/ChevronLeft.svelte';
 	import ChevronRight from 'carbon-icons-svelte/lib/ChevronRight.svelte';
+	import { getClassesStartingOn } from '$lib/pocketbase.js';
+	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
 
 	// --- Types ---
 	interface CalendarDay {
@@ -21,9 +23,23 @@
 		days: CalendarDay[];
 	}
 
-    // --- Props ---
-    // You could make the initial date a prop if needed
-    // let { initialDate = new Date() } = $props();
+    // --- Variables ---
+    let { data } = $props(); // Data passed from the parent component
+
+    let currentDate = $state(new Date()); // Current date for event handling
+    let todayClasses: any = $state( data.todayClasses || []); // Classes for today
+    let rows: any = $derived(
+        todayClasses.map((classObject: any) => ({
+            id: classObject.id,
+            name: classObject.name,
+            description: classObject.description,
+            schedule: classObject.schedule,
+            startTime: classObject.startTime,
+            endTime: classObject.endTime
+        }))
+    );
+
+    let headers = ClassesHeaders.filter((header => header.key !== 'id')); // Filter out the 'id' column
 
 	// --- State ---
     // Use the first day of the month for consistency
@@ -48,6 +64,8 @@
 			year: 'numeric'
 		})
 	);
+    
+    
 
 	// Calculate the grid of weeks and days
 	let calculateCalendarGrid: any = $derived(() => {
@@ -74,7 +92,7 @@
 
 			const dayOfMonth = date.getDate();
 			const isCurrentMonth = date.getMonth() === month && date.getFullYear() === year;
-            const isToday = date.getTime() === today.getTime();
+            const isToday = date.getTime() === currentDate.getTime();
             const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
@@ -115,30 +133,26 @@
 		displayedMonthDate = getFirstDayOfMonth(newDate); // Update state
 	}
 
-    function handleDayClick(day: CalendarDay) {
+    async function handleDayClick(day: CalendarDay) {
         if (!day.isCurrentMonth) return; // Optional: prevent interaction with other month days
         console.log('Clicked on:', day.date.toLocaleDateString());
-        // You could emit an event or update some other state here
+        currentDate = day.date;
+        todayClasses = await getClassesStartingOn(currentDate);
     }
-
 </script>
 
 <Grid>
     <Row>
-        <Column lg={6}>
-            <h3 style="text-align: center; margin-top: 0.5rem;">Select Date</h3>
+        <Column lg={5}>
+            <h3 style="text-align: center; margin-top: 0.5rem;">Calendar</h3>
             <div class="calendar-container">
                 <!-- Header and Navigation -->
                 <Grid fullWidth>
                     <Row>
-                        <Column style="text-align: left;">
-                            <Button kind="ghost" iconDescription="Previous month" icon={ChevronLeft} on:click={goToPrevMonth} aria-label="Previous month" />
-                        </Column>
-                        <Column>
-                            <h2 class="calendar-title" style="text-align: center; margin-top: 0.5rem;">{monthYearLabel}</h2>
-                        </Column>
-                        <Column style="text-align: right;">
-                            <Button kind="ghost" iconDescription="Next month" icon={ChevronRight} on:click={goToNextMonth} aria-label="Next month" />
+                        <Button kind="ghost" iconDescription="Previous month" icon={ChevronLeft} on:click={goToPrevMonth} aria-label="Previous month" />
+                        <Button kind="ghost" iconDescription="Next month" icon={ChevronRight} on:click={goToNextMonth} aria-label="Next month" />
+                        <Column lg={1}>
+                            <h2 class="calendar-title" style="text-align: left; margin-top: 0.5rem;">{monthYearLabel}</h2>
                         </Column>
                     </Row>
                 </Grid>
@@ -176,8 +190,12 @@
                 </table>
             </div>
         </Column>
-        <Column lg={10}>
-            <h3 style="text-align: center; margin-top: 0.5rem;">Schedule</h3>
+        <Column lg={11}>
+            <h3 style="text-align: center; margin-top: 0.5rem; margin-bottom: 1rem;">Schedule</h3>
+            <DataTable
+                {headers}
+                {rows}
+                />
         </Column>
     </Row>
 </Grid>
