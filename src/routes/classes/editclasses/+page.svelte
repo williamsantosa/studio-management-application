@@ -12,7 +12,10 @@
 		Column,
 		Form,
 		FormGroup,
-		TextInput
+		TextInput,
+		DatePicker,
+		DatePickerInput,
+		TimePicker
 	} from 'carbon-components-svelte';
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
 	import Edit from 'carbon-icons-svelte/lib/Edit.svelte';
@@ -22,7 +25,8 @@
 		getClasses,
 		addClass,
 		deleteClass,
-		updateClass
+		updateClass,
+		toPSTTimeString
 	} from '$lib/pocketbase';
 	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
 	
@@ -39,9 +43,9 @@
 			id: classObject.id,
 			name: classObject.name,
 			description: classObject.description,
-			schedule: classObject.schedule,
-			startTime: classObject.startTime,
-			endTime: classObject.endTime
+			day: classObject.day,
+			startTime: classObject.startTime ? toPSTTimeString(classObject.startTime) : '',
+			endTime: classObject.endTime ? toPSTTimeString(classObject.endTime) : ''
 		}))
 	);
 
@@ -55,7 +59,7 @@
     let addClassFormVariables: any = $state({
         name: '',
         description: '',
-        schedule: '',
+		day: '',
         startTime: '',
         endTime: ''
     });
@@ -65,7 +69,7 @@
         id: '',
 		name: '',
         description: '',
-        schedule: '',
+		day: '',
         startTime: '',
         endTime: ''
     });
@@ -150,7 +154,7 @@
 					editClassFormVariables.id = selectedRowIds[0];
 					editClassFormVariables.name = rows.find((row: any) => row.id === selectedRowIds[0]).name;
 					editClassFormVariables.description = rows.find((row: any) => row.id === selectedRowIds[0]).description;
-					editClassFormVariables.schedule = rows.find((row: any) => row.id === selectedRowIds[0]).schedule;
+					editClassFormVariables.day = rows.find((row: any) => row.id === selectedRowIds[0]).day;
 					editClassFormVariables.startTime = rows.find((row: any) => row.id === selectedRowIds[0]).startTime;
 					editClassFormVariables.endTime = rows.find((row: any) => row.id === selectedRowIds[0]).endTime;
 					e.preventDefault();
@@ -168,7 +172,7 @@
 			</Button>
 		</ToolbarBatchActions>
 		<ToolbarContent>
-			<Button on:click={() => (active = true)}>Delete/Edit Row(s)</Button>
+			<Button on:click={() => (active = true)}>Edit/Delete Row(s)</Button>
 		</ToolbarContent>
 	</Toolbar>
 </DataTable>
@@ -180,9 +184,26 @@
 		<FormGroup>
 			<Row>
 				{#each headers as header}
-					<Column>
+				<Column>
+					{#if header.key.toLowerCase().includes("time")}
+						<TextInput
+						bind:value={editClassFormVariables[header.key]}
+							id={header.key}
+							name={header.key}
+							labelText={header.value}
+							placeholder="hh:mm"
+							pattern={'^([0-9]|1\\d|2[0-3]):([0-5]\\d)$'}
+							title="Day"
+							required
+						/>
+					{:else if header.key === "day"}
+						<DatePicker datePickerType="single" bind:value={editClassFormVariables[header.key]}>
+							<DatePickerInput id={header.key} placeholder="mm/dd/yyyy" labelText={header.value}  />
+						</DatePicker>
+					{:else}
 						<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={editClassFormVariables[header.key]}/>
-					</Column>
+					{/if}
+				</Column>
 				{/each}
 				<Button style="margin-top: 1rem;" type="submit">Edit Class</Button>
 			</Row>
@@ -197,7 +218,24 @@
 				<Column/>
 				{#each headers.filter((h) => h.key !== 'id') as header}
 					<Column>
-						<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={addClassFormVariables[header.key]}/>
+						{#if header.key.toLowerCase().includes("time")}
+							<TextInput
+							bind:value={addClassFormVariables[header.key]}
+								id={header.key}
+								name={header.key}
+								labelText={header.value}
+								placeholder="hh:mm"
+								pattern={'^([0-9]|1\\d|2[0-3]):([0-5]\\d)$'}
+								title="Day"
+								required
+							/>
+						{:else if header.key === "day"}
+							<DatePicker datePickerType="single" bind:value={addClassFormVariables[header.key]}>
+								<DatePickerInput id={header.key} placeholder="mm/dd/yyyy" labelText={header.value}  />
+							</DatePicker>
+						{:else}
+							<TextInput id={header.key} labelText={header.value} name={header.key} required bind:value={addClassFormVariables[header.key]}/>
+						{/if}
 					</Column>
 				{/each}
 				<Button style="margin-top: 1rem;" type="submit">Add Class</Button>

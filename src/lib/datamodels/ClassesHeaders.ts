@@ -5,14 +5,14 @@ export const ClassesHeaders:
     id: number;
     name: string;
     description: string;
-    schedule: string;
+    day: string;
     startTime: string;
     endTime: string;
   }>[] = [
     { key: 'id', value: 'ID' },
     { key: 'name', value: 'Name' },
     { key: 'description', value: 'Description' },
-    { key: 'schedule', value: 'Schedule' },
+    { key: 'day', value: 'Day' },
     { key: 'startTime', value: 'StartTime' },
     { key: 'endTime', value: 'EndTime' }
   ];

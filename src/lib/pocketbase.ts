@@ -80,9 +80,9 @@ export async function getClasses(): Promise<RecordModel[]> {
 export interface ClassData {
     name: string; 
     description?: string; 
-    schedule?: string;
-    startDate?: string; 
-    endDate?: string; 
+    day?: string;
+    startTime?: string; 
+    endTime?: string; 
 }
 
 /**
@@ -98,12 +98,16 @@ export async function addClass(classData: ClassData): Promise<RecordModel> {
         if (!classData.name) {
             throw new Error('Class name is required.');
         }
+        
+        classData.startTime = (classData.day && classData.startTime) ? toISODatePST(classData.day, classData.startTime) : undefined;
+        classData.endTime = (classData.day && classData.endTime) ? toISODatePST(classData.day, classData.endTime) : undefined;
 
         // Call PocketBase SDK's create method for the 'classes' collection
         // This assumes the logged-in user has 'create' permissions for the 'classes' collection
-        const newRecord = await pb.collection('classes').create(classData);
 
-        console.log('Class added successfully:', newRecord);
+        const newRecord = await pb.collection('classes').create(classData);
+        console.log('Class created successfully:', newRecord);
+
         return newRecord; // Return the newly created record object
     } catch (error: any) {
         console.error('Failed to add class:', error);
@@ -145,6 +149,9 @@ export async function updateClass(classId: string, classData: ClassData): Promis
             throw new Error('Class name is required for update.');
         }
 
+        classData.startTime = (classData.day && classData.startTime) ? toISODatePST(classData.day, classData.startTime) : undefined;
+        classData.endTime = (classData.day && classData.endTime) ? toISODatePST(classData.day, classData.endTime) : undefined;
+        
         // Call PocketBase SDK's update method for the 'classes' collection
         const updatedRecord = await pb.collection('classes').update(classId, classData);
 
@@ -215,6 +222,46 @@ function formatDateToYYYYMMDD(date: Date): string {
     // Ensures the date is treated as UTC for consistency with PocketBase storage
 	return date.toISOString().split('T')[0];
 }
+
+function toISODatePST(day: string, time: string): string {
+	const [month, dayNum, year] = day.split('/');
+	const [hours, minutes] = time.split(':');
+
+	// Create a Date object assuming it's in PST
+	const pstDate = new Date(
+		Number(year),
+		Number(month) - 1,
+		Number(dayNum),
+		Number(hours),
+		Number(minutes)
+	);
+
+	// Convert PST to UTC by adding the PST offset manually (8 hours normally)
+	const utcMillis = pstDate.getTime() + (8 * 60 * 60 * 1000);
+
+	return new Date(utcMillis).toISOString();
+}
+
+export function toPSTTimeString(input: string): string {
+	// If input already looks like HH:MM (e.g. "09:45" or "23:05")
+	if (/^\d{2}:\d{2}$/.test(input)) {
+		return input; // assume it's already in correct format
+	}
+
+	// Otherwise assume it's an ISO string and convert to PST
+	const date = new Date(input);
+
+	const formatter = new Intl.DateTimeFormat('en-US', {
+		timeZone: 'America/Los_Angeles',
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false
+	});
+
+	return formatter.format(date);
+}
+
+
 
 // --- End Schedules / Classes ---
 
