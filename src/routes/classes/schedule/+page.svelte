@@ -131,13 +131,13 @@
                 <!-- Header and Navigation -->
                 <Grid fullWidth>
                     <Row>
-                        <Column class="calendar-nav" style="text-align: left;">
+                        <Column style="text-align: left;">
                             <Button kind="ghost" iconDescription="Previous month" icon={ChevronLeft} on:click={goToPrevMonth} aria-label="Previous month" />
                         </Column>
-                        <Column class="calendar-nav">
+                        <Column>
                             <h2 class="calendar-title" style="text-align: center; margin-top: 0.5rem;">{monthYearLabel}</h2>
                         </Column>
-                        <Column class="calendar-nav" style="text-align: right;">
+                        <Column style="text-align: right;">
                             <Button kind="ghost" iconDescription="Next month" icon={ChevronRight} on:click={goToNextMonth} aria-label="Next month" />
                         </Column>
                     </Row>
@@ -191,22 +191,6 @@
         border-radius: 4px;
         padding: 1rem;
         background-color: var(--cds-background, #fff);
-	}
-
-	.calendar-nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-        padding: 0 0.5rem; /* Align better with table */
-	}
-
-    .calendar-nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: right;
-		margin-bottom: 1rem;
-        padding: 0 0.5rem; /* Align better with table */
 	}
 
     .calendar-title {
@@ -278,12 +262,6 @@
 		color: var(--cds-text-on-color, #ffffff);
 		font-weight: 600;
 	}
-
-    /* Optional: Slightly different style for weekend days */
-    .calendar-table td.weekend:not(.other-month) {
-         /* background-color: #fafafa; */ /* Subtle background difference */
-    }
-
 
 	/* Basic Responsive */
 	@media (max-width: 600px) {
