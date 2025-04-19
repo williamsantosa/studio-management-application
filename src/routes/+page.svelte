@@ -102,7 +102,7 @@
 						<TextInput
 							bind:value={identifier}
 							labelText="identifier"
-							placeholder="Enter identifier"
+							placeholder="Enter email or username"
 							type="identifier"
 							required
 							disabled={isLoading}

@@ -263,6 +263,18 @@ export async function updateInventoryItem(itemId: string, itemData: InventoryDat
     }
 }
 
+export async function updateItemOrder(itemId: string, newOrder: number): Promise<RecordModel> {
+    try {
+        const updated = await pb.collection('belts').update(itemId, { order: newOrder });
+        console.log(`Updated order for ${itemId} to ${newOrder}`, updated);
+        return updated;
+    } catch (error: any) {
+        console.error(`Failed to update order for ${itemId}:`, error);
+        throw error;
+    }
+}
+
+
 /**
  * Formats a Date object into 'YYYY-MM-DD' string format (UTC).
  * @param {Date} date - The date object to format.
