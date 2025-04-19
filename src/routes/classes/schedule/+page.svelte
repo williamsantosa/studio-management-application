@@ -6,7 +6,7 @@
 	import { Button, Grid, Row, Column, DataTable } from 'carbon-components-svelte';
 	import ChevronLeft from 'carbon-icons-svelte/lib/ChevronLeft.svelte';
 	import ChevronRight from 'carbon-icons-svelte/lib/ChevronRight.svelte';
-	import { getClassesStartingOn, toPSTTimeString } from '$lib/pocketbase.js';
+	import { getClassesStartingOn } from '$lib/pocketbase.js';
 	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
 
 	// --- Types ---
@@ -34,8 +34,8 @@
             name: classObject.name,
             description: classObject.description,
             schedule: classObject.schedule,
-			startTime: classObject.startTime ? toPSTTimeString(classObject.startTime) : '',
-			endTime: classObject.endTime ? toPSTTimeString(classObject.endTime) : ''
+			startTime: classObject.startTime,
+			endTime: classObject.endTime
         }))
     );
 
@@ -137,7 +137,14 @@
         if (!day.isCurrentMonth) return; // Optional: prevent interaction with other month days
         console.log('Clicked on:', day.date.toLocaleDateString());
         currentDate = day.date;
-        todayClasses = await getClassesStartingOn(currentDate);
+        todayClasses = await getClassesStartingOn(formatDateToMMDDYYYY(currentDate));
+    }
+
+    function formatDateToMMDDYYYY(date: Date): string {
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is 0-based
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
     }
 </script>
 

@@ -97,9 +97,6 @@ export async function addClass(classData: ClassData): Promise<RecordModel> {
         if (!classData.name) {
             throw new Error('Class name is required.');
         }
-        
-        classData.startTime = (classData.day && classData.startTime) ? toISODatePST(classData.day, classData.startTime) : undefined;
-        classData.endTime = (classData.day && classData.endTime) ? toISODatePST(classData.day, classData.endTime) : undefined;
 
         // Call PocketBase SDK's create method for the 'classes' collection
         // This assumes the logged-in user has 'create' permissions for the 'classes' collection
@@ -147,9 +144,6 @@ export async function updateClass(classId: string, classData: ClassData): Promis
         if (!classData.name) {
             throw new Error('Class name is required for update.');
         }
-
-        classData.startTime = (classData.day && classData.startTime) ? toISODatePST(classData.day, classData.startTime) : undefined;
-        classData.endTime = (classData.day && classData.endTime) ? toISODatePST(classData.day, classData.endTime) : undefined;
         
         // Call PocketBase SDK's update method for the 'classes' collection
         const updatedRecord = await pb.collection('classes').update(classId, classData);
@@ -174,42 +168,17 @@ export async function updateClass(classId: string, classData: ClassData): Promis
  * @returns {Promise<RecordModel[]>} A promise that resolves to an array of class records starting on that date.
  * @throws {Error} Throws an error if the retrieval fails or the date is invalid.
  */
-export async function getClassesStartingOn(targetDate: Date): Promise<RecordModel[]> {
+export async function getClassesStartingOn(day: string) {
     try {
-        // Basic validation for the input date
-        if (!(targetDate instanceof Date) || isNaN(targetDate.getTime())) {
-            throw new Error('Invalid target date provided.');
-        }
-
-        const dateString = formatDateToYYYYMMDD(targetDate);
-
-        // --- Filter construction ---
-        // This filter works for DateTime fields by checking the entire day range.
-        // PocketBase filter syntax requires quotes around date/string values.
-        const filterString = `startTime >= "${dateString} 00:00:00.000Z" && startTime <= "${dateString} 23:59:59.000Z"`;
-
-        // --- Alternative filter for Date-only fields ---
-        // If your 'startDate' field ONLY stores the date (no time), use this simpler filter:
-        // const filterString = `startDate = "${dateString}"`;
-
-        console.log(`Fetching classes with filter: ${filterString}`);
-
-        const records = await pb.collection('classes').getFullList({
-            filter: filterString,
-            sort: '-created', // Optional: Keep sorting consistent or adjust as needed
-            // Add other options like 'expand' if required
+        const result = await pb.collection('classes').getFullList({
+            filter: `day = "${day}"`,
+            sort: '+startTime'
         });
 
-        console.log(`Found ${records.length} classes starting on ${dateString}`);
-        return records;
-
-    } catch (error: any) {
-        console.error(`Failed to get classes starting on ${targetDate.toDateString()}:`, error);
-        // Log PocketBase specific errors if available
-        if (error.data) {
-            console.error('PocketBase error details:', error.data);
-        }
-        throw error; // Re-throw the error for the caller to handle
+        return result;
+    } catch (error) {
+        console.error('Error fetching classes for day:', day, error);
+        throw error;
     }
 }
 
@@ -303,46 +272,6 @@ function formatDateToYYYYMMDD(date: Date): string {
     // Ensures the date is treated as UTC for consistency with PocketBase storage
 	return date.toISOString().split('T')[0];
 }
-
-function toISODatePST(day: string, time: string): string {
-	const [month, dayNum, year] = day.split('/');
-	const [hours, minutes] = time.split(':');
-
-	// Create a Date object assuming it's in PST
-	const pstDate = new Date(
-		Number(year),
-		Number(month) - 1,
-		Number(dayNum),
-		Number(hours),
-		Number(minutes)
-	);
-
-	// Convert PST to UTC by adding the PST offset manually (8 hours normally)
-	const utcMillis = pstDate.getTime() + (8 * 60 * 60 * 1000);
-
-	return new Date(utcMillis).toISOString();
-}
-
-export function toPSTTimeString(input: string): string {
-	// If input already looks like HH:MM (e.g. "09:45" or "23:05")
-	if (/^\d{2}:\d{2}$/.test(input)) {
-		return input; // assume it's already in correct format
-	}
-
-	// Otherwise assume it's an ISO string and convert to PST
-	const date = new Date(input);
-
-	const formatter = new Intl.DateTimeFormat('en-US', {
-		timeZone: 'America/Los_Angeles',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false
-	});
-
-	return formatter.format(date);
-}
-
-
 
 // --- End Schedules / Classes ---
 

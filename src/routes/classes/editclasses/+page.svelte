@@ -24,8 +24,7 @@
 		getClasses,
 		addClass,
 		deleteClass,
-		updateClass,
-		toPSTTimeString
+		updateClass
 	} from '$lib/pocketbase';
 	import { ClassesHeaders } from '$lib/datamodels/ClassesHeaders.js';
 	
@@ -43,8 +42,8 @@
 			name: classObject.name,
 			description: classObject.description,
 			day: classObject.day,
-			startTime: classObject.startTime ? toPSTTimeString(classObject.startTime) : '',
-			endTime: classObject.endTime ? toPSTTimeString(classObject.endTime) : ''
+			startTime: classObject.startTime,
+			endTime: classObject.endTime
 		}))
 	);
 
