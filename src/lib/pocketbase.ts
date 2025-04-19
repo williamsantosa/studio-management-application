@@ -63,7 +63,7 @@ export function isUserAuthenticated() {
 }
 
 
-// --- Schedules / Classes ---
+// ---  Classes ---
 
 /**
  * Retrieves a full list of classes.
@@ -76,7 +76,6 @@ export async function getClasses(): Promise<RecordModel[]> {
     });
 }
 
-// --- Define the data structure for creating a class ---
 export interface ClassData {
     name: string; 
     description?: string; 
@@ -165,6 +164,7 @@ export async function updateClass(classId: string, classData: ClassData): Promis
     }
 }
 
+
 /**
  * Retrieves a full list of classes that start on a specific date.
  * Assumes the 'classes' collection has a 'startDate' field (Date or DateTime).
@@ -210,6 +210,87 @@ export async function getClassesStartingOn(targetDate: Date): Promise<RecordMode
             console.error('PocketBase error details:', error.data);
         }
         throw error; // Re-throw the error for the caller to handle
+    }
+}
+
+// --- Inventory Functions ---
+
+export interface InventoryData {
+    name: string; 
+    quantity: number; 
+    sellPrice: number; 
+    vendor?: string; 
+}
+
+export async function getInventory(): Promise<RecordModel[]> {
+    // Consider adding options like filter or expand if needed
+    return await pb.collection('inventory').getFullList({
+        sort: '-created', // Example sort
+    });
+}
+
+export async function addInventoryItem(itemData: InventoryData): Promise<RecordModel> {
+    try {
+        // Ensure required fields are provided (basic client-side check)
+        if (!itemData.name || itemData.quantity < 0 || itemData.sellPrice < 0) {
+            throw new Error('Name, quantity, and sell price are required.');
+        }
+
+        // Call PocketBase SDK's create method for the 'inventory' collection
+        const newRecord = await pb.collection('inventory').create(itemData);
+        console.log('Inventory item created successfully:', newRecord);
+
+        return newRecord; // Return the newly created record object
+    }
+    catch (error: any) {
+        console.error('Failed to add inventory item:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
+}
+
+export async function deleteInventoryItem(itemId: string): Promise<void> {
+    try {
+        // Ensure the itemId is provided
+        if (!itemId) {
+            throw new Error('Item ID is required for deletion.');
+        }
+
+        // Call PocketBase SDK's delete method for the 'inventory' collection
+        await pb.collection('inventory').delete(itemId);
+
+        console.log(`Inventory item with ID ${itemId} deleted successfully.`);
+    }
+    catch (error: any) {
+        console.error('Failed to delete inventory item:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
+}
+
+export async function updateInventoryItem(itemId: string, itemData: InventoryData): Promise<RecordModel> {
+    try {
+        // Ensure the itemId and itemData are provided
+        if (!itemId) {
+            throw new Error('Item ID is required for update.');
+        }
+        if (!itemData.name || itemData.quantity < 0 || itemData.sellPrice < 0) {
+            throw new Error('Name, quantity, and sell price are required for update.');
+        }
+
+        // Call PocketBase SDK's update method for the 'inventory' collection
+        const updatedRecord = await pb.collection('inventory').update(itemId, itemData);
+
+        console.log('Inventory item updated successfully:', updatedRecord);
+        return updatedRecord; // Return the updated record object
+    }
+    catch (error: any) {
+        console.error('Failed to update inventory item:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
     }
 }
 

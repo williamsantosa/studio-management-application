@@ -14,8 +14,7 @@
 		FormGroup,
 		TextInput,
 		DatePicker,
-		DatePickerInput,
-		TimePicker
+		DatePickerInput
 	} from 'carbon-components-svelte';
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
 	import Edit from 'carbon-icons-svelte/lib/Edit.svelte';
@@ -158,6 +157,7 @@
 					editClassFormVariables.startTime = rows.find((row: any) => row.id === selectedRowIds[0]).startTime;
 					editClassFormVariables.endTime = rows.find((row: any) => row.id === selectedRowIds[0]).endTime;
 					e.preventDefault();
+					selectedRowIds = [];
 					active = false;
 				}}
 			>
