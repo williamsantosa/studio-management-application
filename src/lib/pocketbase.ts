@@ -287,6 +287,14 @@ function formatDateToYYYYMMDD(date: Date): string {
 
 // --- End Schedules / Classes ---
 
+// Belt Requirements
+
+export async function getBeltRequirements(): Promise<RecordModel[]> {
+    return await pb.collection('belt_requirements').getFullList({
+        sort: '-created', // Example sort
+    });
+}
+
 
 // --- Check initial auth state ---
 // console.log('Initial PocketBase auth state:', {

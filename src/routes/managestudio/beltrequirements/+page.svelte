@@ -9,7 +9,6 @@
 		Column,
 		Form,
 		FormGroup,
-		NumberInput,
 		TextInput
 	} from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
@@ -21,7 +20,11 @@
      } from 'carbon-icons-svelte';
 	let items: any = $state([]);
 	let selected: number = $state(0);
-	let beltName: string = $state('');
+    let selectedBeltName: string = $derived(items[selected]?.name || '');
+    let requirements: any = $derived(0);
+	let addBeltName: string = $state('');
+    let requirementName: string = $state('');
+    let requirementDescription: string = $state('');
 
 	// Fetch items and sort by order
 	async function loadItems() {
@@ -52,11 +55,11 @@
 	async function addBeltSubmit(event: SubmitEvent) {
 		event.preventDefault(); // Prevent default form submission
 
-		if (!beltName) return; // Ensure belt name is not empty
+		if (!addBeltName) return; // Ensure belt name is not empty
 
 		try {
-			const newBelt = await pb.collection('belts').create({ name: beltName, order: items.length });
-			beltName = ''; // Reset input field
+			const newBelt = await pb.collection('belts').create({ name: addBeltName, order: items.length });
+			addBeltName = ''; // Reset input field
             await loadItems(); // Reload to reflect new order
 		} catch (error) {
 			console.error('Error adding new belt:', error);
@@ -76,6 +79,22 @@
             await loadItems(); // Reload to reflect new order
         } catch (error) {
             console.error('Error removing belt:', error);
+        }
+    }
+
+    async function addBeltRequirementSubmit(event: SubmitEvent) {
+        event.preventDefault(); // Prevent default form submission
+        try { 
+            const newRequirement = await pb.collection('beltRequirements').create({
+                beltName: selectedBeltName,
+                requirementName: requirementName,
+                description: requirementDescription,
+            });
+            requirementName = ''; // Reset input field
+            requirementDescription = ''; // Reset input field
+            requirements = await pb.collection('beltRequirements').getFullList({ filter: `beltName="${selectedBeltName}"` });
+        } catch (error) {
+            console.error('Error adding new requirement:', error);
         }
     }
 </script>
@@ -126,11 +145,11 @@
 				<Row>
 					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 5 }}>
 						<TextInput
-							id="beltName"
+							id="addBeltName"
 							labelText="Belt Name"
 							name="Belt Name"
 							required
-							bind:value={beltName}
+							bind:value={addBeltName}
 						/>
 					</Column>
 					<Column md={{ span: 6, offset: 1 }} lg={{ span: 2, offset: 0 }}>
@@ -144,3 +163,34 @@
 
 <h3 style="text-align: center;">Requirements</h3>
 
+<Grid fullWidth style="margin-top: 1rem;">
+	<Form action="/classes/editclasses" method="POST" on:submit={addBeltRequirementSubmit}>
+		<FormGroup>
+			<Grid>
+				<Row>
+					<Column md={{ span: 3, offset: 1 }} lg={{ span: 3, offset: 3 }}>
+						<TextInput
+							id="addRequirementName"
+							labelText="Requirement"
+							name="Requiremment Name"
+							required
+							bind:value={requirementName}
+						/>
+					</Column>
+                    <Column md={{ span: 5, offset: 1 }} lg={{ span: 5, offset: 0 }}>
+						<TextInput
+							id="addRequirementDescription"
+							labelText="Description"
+							name="Requirement Description"
+							required
+							bind:value={requirementDescription}
+						/>
+					</Column>
+					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 0 }}>
+						<Button style="margin-top: 1rem;" type="submit">Add Requirement</Button>
+					</Column>
+				</Row>
+			</Grid>
+		</FormGroup>
+	</Form>
+</Grid>
