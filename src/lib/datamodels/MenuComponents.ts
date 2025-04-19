@@ -36,5 +36,5 @@ export const MenuComponents: Array<{
     //     ]
     // },
     { text: 'Inventory', href: '/inventory' },
-    { text: 'Logs', href: '/logs' }
+    // { text: 'Logs', href: '/logs' }
 ];
