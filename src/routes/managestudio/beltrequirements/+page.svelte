@@ -84,7 +84,7 @@
 
 <Grid fullWidth >
 	<Row>
-		<Column md={{ span: 6, offset: 1 }} lg={{ span: 14, offset: 2 }}>
+		<Column md={{ span: 6, offset: 1 }} lg={{ span: 12, offset: 2 }}>
 			<Tabs type="container" bind:selected style="margin-top: 1rem;">
 				{#each items as item, index}
 					<Tab label={item.name} />
@@ -119,12 +119,12 @@
 	</Row>
 </Grid>
 
-<Grid fullWidth style="margin-top: 8rem;">
+<Grid fullWidth style="margin-top: 10rem;">
 	<Form action="/classes/editclasses" method="POST" on:submit={addBeltSubmit}>
 		<FormGroup>
 			<Grid>
 				<Row>
-					<Column md={{ span: 6, offset: 1 }} lg={{ span: 6, offset: 5 }}>
+					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 5 }}>
 						<TextInput
 							id="beltName"
 							labelText="Belt Name"
@@ -133,7 +133,7 @@
 							bind:value={beltName}
 						/>
 					</Column>
-					<Column md={{ span: 6, offset: 1 }} lg={{ span: 6, offset: 5 }}>
+					<Column md={{ span: 6, offset: 1 }} lg={{ span: 2, offset: 0 }}>
 						<Button style="margin-top: 1rem;" type="submit">Add Belt</Button>
 					</Column>
 				</Row>
@@ -143,3 +143,4 @@
 </Grid>
 
 <h3 style="text-align: center;">Requirements</h3>
+
