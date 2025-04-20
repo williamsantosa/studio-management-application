@@ -226,38 +226,6 @@
 <h3 style="text-align: center;">Requirements</h3>
 
 <Grid fullWidth style="margin-top: 1rem;">
-	<Form action="/classes/editclasses" method="POST" on:submit={addBeltRequirementSubmit}>
-		<FormGroup>
-			<Grid>
-				<Row>
-					<Column md={{ span: 3, offset: 1 }} lg={{ span: 3, offset: 3 }}>
-						<TextInput
-							id="addRequirementName"
-							labelText="Requirement"
-							name="Requiremment Name"
-							required
-							bind:value={requirementName}
-						/>
-					</Column>
-                    <Column md={{ span: 5, offset: 1 }} lg={{ span: 5, offset: 0 }}>
-						<TextInput
-							id="addRequirementDescription"
-							labelText="Description"
-							name="Requirement Description"
-							required
-							bind:value={requirementDescription}
-						/>
-					</Column>
-					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 0 }}>
-						<Button style="margin-top: 1rem;" type="submit">Add Requirement</Button>
-					</Column>
-				</Row>
-			</Grid>
-		</FormGroup>
-	</Form>
-</Grid>
-
-<Grid fullWidth style="margin-top: 1rem;">
 	<Form action="/classes/editclasses" method="POST" on:submit={editBeltRequirementSubmit}>
 		<FormGroup>
 			<Grid>
@@ -291,6 +259,38 @@
 					</Column>
 					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 0 }}>
 						<Button style="margin-top: 1rem;" type="submit">Edit Requirement</Button>
+					</Column>
+				</Row>
+			</Grid>
+		</FormGroup>
+	</Form>
+</Grid>
+
+<Grid fullWidth style="margin-top: 1rem;">
+	<Form action="/classes/editclasses" method="POST" on:submit={addBeltRequirementSubmit}>
+		<FormGroup>
+			<Grid>
+				<Row>
+					<Column md={{ span: 3, offset: 1 }} lg={{ span: 3, offset: 3 }}>
+						<TextInput
+							id="addRequirementName"
+							labelText="Requirement"
+							name="Requiremment Name"
+							required
+							bind:value={requirementName}
+						/>
+					</Column>
+                    <Column md={{ span: 5, offset: 1 }} lg={{ span: 5, offset: 0 }}>
+						<TextInput
+							id="addRequirementDescription"
+							labelText="Description"
+							name="Requirement Description"
+							required
+							bind:value={requirementDescription}
+						/>
+					</Column>
+					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 0 }}>
+						<Button style="margin-top: 1rem;" type="submit">Add Requirement</Button>
 					</Column>
 				</Row>
 			</Grid>
