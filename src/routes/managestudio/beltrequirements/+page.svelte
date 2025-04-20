@@ -9,15 +9,20 @@
 		Column,
 		Form,
 		FormGroup,
-		TextInput
+		TextInput,
+		DataTable,
+		Toolbar,
+		ToolbarContent,
+		ToolbarBatchActions,
+		Pagination
 	} from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { pb, updateItemOrder } from '$lib/pocketbase'; // replace with your file
 	import ChevronRight from 'carbon-icons-svelte/lib/ChevronRight.svelte';
 	import ChevronLeft from 'carbon-icons-svelte/lib/ChevronLeft.svelte';
-    import { TrashCan
-
-     } from 'carbon-icons-svelte';
+    import { TrashCan, Edit} from 'carbon-icons-svelte';
+	import { BeltRequirementsHeaders } from '$lib/datamodels/BeltRequirementsHeaders';
+	// State
 	let items: any = $state([]);
 	let selected: number = $state(0);
     let selectedBeltName: string = $derived(items[selected]?.name || '');
@@ -25,6 +30,35 @@
 	let addBeltName: string = $state('');
     let requirementName: string = $state('');
     let requirementDescription: string = $state('');
+
+	// Initialize table data and rows
+	let { data } = $props();
+
+    let tableData: any = $state(data.beltRequirements);
+	let rows: any = $derived(
+		tableData.filter((r: any) => r.beltName === selectedBeltName).map((beltRequirementObject: any) => ({
+			id: beltRequirementObject.id,
+			beltName: beltRequirementObject.beltName,
+			requirementName: beltRequirementObject.requirementName,
+			description: beltRequirementObject.description,
+        }))
+	);
+
+	// Table variables
+	const headers = BeltRequirementsHeaders;
+
+	let pageSize = $state(10);
+	let page = $state(1);
+	let active: boolean = $state(false);
+	let selectedRowIds: Array<Number> = $state([]);
+
+	// Form variables
+    let editBeltRequirementFormVariables: any = $state({
+        id: '',
+		beltName: '',
+		requirementName: '',
+		description: ''
+    });
 
 	// Fetch items and sort by order
 	async function loadItems() {
@@ -97,6 +131,19 @@
             console.error('Error adding new requirement:', error);
         }
     }
+
+	async function handleDeleteBeltRequirementSubmit(event: MouseEvent) {
+		event.preventDefault(); // Prevent default form submission
+		try {
+			selectedRowIds.forEach(async (selectedRowId: any) => {
+				await pb.collection('beltRequirements').delete(selectedRowId);
+			});
+			selectedRowIds = []; // Clear selected row IDs
+			tableData = await pb.collection('beltRequirements').getFullList({ filter: `beltName="${selectedBeltName}"` });
+		} catch (error) {
+			console.error('Error deleting belt requirement:', error);
+		}
+	}
 </script>
 
 <h3 style="text-align: center;">Belts</h3>
@@ -194,3 +241,51 @@
 		</FormGroup>
 	</Form>
 </Grid>
+
+<DataTable
+	selectable
+	batchSelection={active}
+	bind:selectedRowIds
+	{headers}
+	{rows}
+	{pageSize}
+	{page}
+>
+	<Toolbar>
+		<ToolbarBatchActions
+			bind:active
+			on:cancel={(e) => {
+				e.preventDefault();
+				active = false;
+			}}
+		>
+			<Button
+				icon={Edit}
+				disabled={selectedRowIds.length !== 1}
+				on:click={(e) => {
+					editBeltRequirementFormVariables.id = selectedRowIds[0];
+					editBeltRequirementFormVariables.beltName = rows.find((row: any) => row.id === selectedRowIds[0]).beltName;
+					editBeltRequirementFormVariables.requirementName = rows.find((row: any) => row.id === selectedRowIds[0]).requirementName;
+					editBeltRequirementFormVariables.description = rows.find((row: any) => row.id === selectedRowIds[0]).description;
+                    e.preventDefault();
+                    selectedRowIds = [];
+					active = false;
+				}}
+			>
+				Edit
+			</Button>
+			<Button
+				icon={TrashCan}
+				disabled={selectedRowIds.length === 0}
+				on:click={(event) => {handleDeleteBeltRequirementSubmit(event)}}
+			>
+				Delete
+			</Button>
+		</ToolbarBatchActions>
+		<ToolbarContent>
+			<Button on:click={() => (active = true)}>Edit/Delete Row(s)</Button>
+		</ToolbarContent>
+	</Toolbar>
+</DataTable>
+
+<Pagination style="margin-bottom: 2rem;" bind:pageSize bind:page totalItems={tableData.length} pageSizeInputDisabled />

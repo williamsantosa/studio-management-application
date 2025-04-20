@@ -290,7 +290,7 @@ function formatDateToYYYYMMDD(date: Date): string {
 // Belt Requirements
 
 export async function getBeltRequirements(): Promise<RecordModel[]> {
-    return await pb.collection('belt_requirements').getFullList({
+    return await pb.collection('beltRequirements').getFullList({
         sort: '-created', // Example sort
     });
 }
