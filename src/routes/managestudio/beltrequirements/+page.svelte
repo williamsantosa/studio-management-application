@@ -144,6 +144,21 @@
 			console.error('Error deleting belt requirement:', error);
 		}
 	}
+
+	async function editBeltRequirementSubmit(event: SubmitEvent) {
+		event.preventDefault(); // Prevent default form submission
+		try {
+			await pb.collection('beltRequirements').update(editBeltRequirementFormVariables.id, {
+				beltName: editBeltRequirementFormVariables.beltName,
+				requirementName: editBeltRequirementFormVariables.requirementName,
+				description: editBeltRequirementFormVariables.description,
+			});
+			editBeltRequirementFormVariables = { id: '', beltName: '', requirementName: '', description: '' }; // Reset input fields
+			tableData = await pb.collection('beltRequirements').getFullList({ filter: `beltName="${selectedBeltName}"` });
+		} catch (error) {
+			console.error('Error editing belt requirement:', error);
+		}
+	}
 </script>
 
 <h3 style="text-align: center;">Belts</h3>
@@ -235,6 +250,47 @@
 					</Column>
 					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 0 }}>
 						<Button style="margin-top: 1rem;" type="submit">Add Requirement</Button>
+					</Column>
+				</Row>
+			</Grid>
+		</FormGroup>
+	</Form>
+</Grid>
+
+<Grid fullWidth style="margin-top: 1rem;">
+	<Form action="/classes/editclasses" method="POST" on:submit={editBeltRequirementSubmit}>
+		<FormGroup>
+			<Grid>
+				<Row>
+					<Column md={{ span: 3, offset: 1 }} lg={{ span: 3, offset: 0 }}>
+						<TextInput
+							id="addRequirementID"
+							labelText="Requirement ID"
+							name="Requiremment ID"
+							required
+							bind:value={editBeltRequirementFormVariables.id}
+						/>
+					</Column>
+					<Column md={{ span: 3, offset: 1 }} lg={{ span: 3, offset: 0 }}>
+						<TextInput
+							id="addRequirementName"
+							labelText="Requirement"
+							name="Requiremment Name"
+							required
+							bind:value={editBeltRequirementFormVariables.requirementName}
+						/>
+					</Column>
+                    <Column md={{ span: 2, offset: 1 }} lg={{ span: 5, offset: 0 }}>
+						<TextInput
+							id="addRequirementDescription"
+							labelText="Description"
+							name="Requirement Description"
+							required
+							bind:value={editBeltRequirementFormVariables.description}
+						/>
+					</Column>
+					<Column md={{ span: 6, offset: 1 }} lg={{ span: 4, offset: 0 }}>
+						<Button style="margin-top: 1rem;" type="submit">Edit Requirement</Button>
 					</Column>
 				</Row>
 			</Grid>
