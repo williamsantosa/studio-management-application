@@ -223,7 +223,55 @@
 	</Form>
 </Grid>
 
-<h3 style="text-align: center;">Requirements</h3>
+<h3 style="text-align: center; margin-bottom: 1rem;">Requirements</h3>
+
+<DataTable
+	selectable
+	batchSelection={active}
+	bind:selectedRowIds
+	{headers}
+	{rows}
+	{pageSize}
+	{page}
+>
+	<Toolbar>
+		<ToolbarBatchActions
+			bind:active
+			on:cancel={(e) => {
+				e.preventDefault();
+				active = false;
+			}}
+		>
+			<Button
+				icon={Edit}
+				disabled={selectedRowIds.length !== 1}
+				on:click={(e) => {
+					editBeltRequirementFormVariables.id = selectedRowIds[0];
+					editBeltRequirementFormVariables.beltName = rows.find((row: any) => row.id === selectedRowIds[0]).beltName;
+					editBeltRequirementFormVariables.requirementName = rows.find((row: any) => row.id === selectedRowIds[0]).requirementName;
+					editBeltRequirementFormVariables.description = rows.find((row: any) => row.id === selectedRowIds[0]).description;
+                    e.preventDefault();
+                    selectedRowIds = [];
+					active = false;
+				}}
+			>
+				Edit
+			</Button>
+			<Button
+				icon={TrashCan}
+				disabled={selectedRowIds.length === 0}
+				on:click={(event) => {handleDeleteBeltRequirementSubmit(event)}}
+			>
+				Delete
+			</Button>
+		</ToolbarBatchActions>
+		<ToolbarContent>
+			<Button on:click={() => (active = true)}>Edit/Delete Row(s)</Button>
+		</ToolbarContent>
+	</Toolbar>
+</DataTable>
+
+<Pagination style="margin-bottom: 2rem;" bind:pageSize bind:page totalItems={tableData.length} pageSizeInputDisabled />
 
 <Grid fullWidth style="margin-top: 1rem;">
 	<Form action="/classes/editclasses" method="POST" on:submit={editBeltRequirementSubmit}>
@@ -298,50 +346,3 @@
 	</Form>
 </Grid>
 
-<DataTable
-	selectable
-	batchSelection={active}
-	bind:selectedRowIds
-	{headers}
-	{rows}
-	{pageSize}
-	{page}
->
-	<Toolbar>
-		<ToolbarBatchActions
-			bind:active
-			on:cancel={(e) => {
-				e.preventDefault();
-				active = false;
-			}}
-		>
-			<Button
-				icon={Edit}
-				disabled={selectedRowIds.length !== 1}
-				on:click={(e) => {
-					editBeltRequirementFormVariables.id = selectedRowIds[0];
-					editBeltRequirementFormVariables.beltName = rows.find((row: any) => row.id === selectedRowIds[0]).beltName;
-					editBeltRequirementFormVariables.requirementName = rows.find((row: any) => row.id === selectedRowIds[0]).requirementName;
-					editBeltRequirementFormVariables.description = rows.find((row: any) => row.id === selectedRowIds[0]).description;
-                    e.preventDefault();
-                    selectedRowIds = [];
-					active = false;
-				}}
-			>
-				Edit
-			</Button>
-			<Button
-				icon={TrashCan}
-				disabled={selectedRowIds.length === 0}
-				on:click={(event) => {handleDeleteBeltRequirementSubmit(event)}}
-			>
-				Delete
-			</Button>
-		</ToolbarBatchActions>
-		<ToolbarContent>
-			<Button on:click={() => (active = true)}>Edit/Delete Row(s)</Button>
-		</ToolbarContent>
-	</Toolbar>
-</DataTable>
-
-<Pagination style="margin-bottom: 2rem;" bind:pageSize bind:page totalItems={tableData.length} pageSizeInputDisabled />
