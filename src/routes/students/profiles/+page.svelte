@@ -36,7 +36,7 @@
             text: studentObject.name,
             dateOfBirth: studentObject.dateOfBirth,
             email: studentObject.email,
-            phoneNumber: studentObject.phone,
+            phoneNumber: studentObject.phoneNumber,
             address: studentObject.address,
             currentBelt: studentObject.currentBelt,
             earnedBeltDate: studentObject.earnedBeltDate,
@@ -64,6 +64,11 @@
     });
 
     let selectedId: string = $state('addStudent');
+    let selectedStudent: any = $derived(items.find((item) => item.id === selectedId));
+    $effect(() => {
+        console.log('Selected student:', selectedStudent);
+        console.log('studentData:', studentData.find((item => item.id === selectedId)));
+    });
 
     async function handleAddStudentSubmit(event: Event) {
         event.preventDefault();
@@ -147,10 +152,14 @@
 	</Form>
 </Grid>
 {:else}
-<h1>hey</h1>
+<h1 style="margin-top: 1rem">{selectedStudent.text}</h1>
+<p style="margin-top: 1rem">Date of Birth: {selectedStudent.dateOfBirth}</p>
+<p style="margin-top: 1rem">Email: {selectedStudent.email}</p>
+<p style="margin-top: 1rem">Phone Number: {selectedStudent.phoneNumber}</p>
+<p style="margin-top: 1rem">Address: {selectedStudent.address}</p>
+<p style="margin-top: 1rem">Current Belt: {selectedStudent.currentBelt}</p>
+<p style="margin-top: 1rem">Earned Belt Date: {selectedStudent.earnedBeltDate}</p>
 {/if}
-
-
 <style>
 	:global(.bx--list-box__menu-item, .bx--list-box__menu-item__option) {
 		height: auto;
