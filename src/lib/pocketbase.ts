@@ -295,6 +295,13 @@ export async function getBeltRequirements(): Promise<RecordModel[]> {
     });
 }
 
+// Students
+
+export async function getStudents(): Promise<RecordModel[]> {
+    return await pb.collection('students').getFullList({
+        sort: '-created', // Example sort
+    });
+}
 
 // --- Check initial auth state ---
 // console.log('Initial PocketBase auth state:', {
