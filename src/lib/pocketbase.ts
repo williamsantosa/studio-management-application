@@ -297,10 +297,83 @@ export async function getBeltRequirements(): Promise<RecordModel[]> {
 
 // Students
 
+export interface StudentData {
+    name: string; 
+    dateOfBirth?: string;
+    email?: string;
+    phoneNumber?: string;
+    address?: string;
+    currentBelt?: string;
+    earnedBeltDate?: string;
+    profilePicture?: Array<File>;
+}
+
 export async function getStudents(): Promise<RecordModel[]> {
     return await pb.collection('students').getFullList({
         sort: '-created', // Example sort
     });
+}
+
+export async function addStudent(studentData: StudentData): Promise<RecordModel> {
+    try {
+        // Ensure required fields are provided (basic client-side check)
+        if (!studentData.name) {
+            throw new Error('Student name is required.');
+        }
+
+        // Call PocketBase SDK's create method for the 'students' collection
+        const newRecord = await pb.collection('students').create(studentData);
+        console.log('Student created successfully:', newRecord);
+
+        return newRecord; // Return the newly created record object
+    } catch (error: any) {
+        console.error('Failed to add student:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
+}
+
+export async function deleteStudent(studentId: string): Promise<void> {
+    try {
+        // Ensure the studentId is provided
+        if (!studentId) {
+            throw new Error('Student ID is required for deletion.');
+        }
+
+        // Call PocketBase SDK's delete method for the 'students' collection
+        await pb.collection('students').delete(studentId);
+
+        console.log(`Student with ID ${studentId} deleted successfully.`);
+    } catch (error: any) {
+        console.error('Failed to delete student:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
+}
+
+export async function editStudent(studentId: string, studentData: StudentData): Promise<RecordModel> {
+    try {
+        // Ensure the studentId and studentData are provided
+        if (!studentId) {
+            throw new Error('Student ID is required for update.');
+        }
+        if (!studentData.name) {
+            throw new Error('Student name is required for update.');
+        }
+
+        // Call PocketBase SDK's update method for the 'students' collection
+        const updatedRecord = await pb.collection('students').update(studentId, studentData);
+
+        console.log('Student updated successfully:', updatedRecord);
+        return updatedRecord; // Return the updated record object
+    } catch (error: any) {
+        console.error('Failed to update student:', error);
+        // Log the full PocketBase error structure for debugging
+        console.error('PocketBase error details:', error.data);
+        throw error;
+    }
 }
 
 // --- Check initial auth state ---
