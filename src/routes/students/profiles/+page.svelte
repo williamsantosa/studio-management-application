@@ -7,17 +7,19 @@
         Form,
         FormGroup,
         TextInput,
-        NumberInput,
         Button,
         FileUploader,
-        FileUploaderItem,
+        DatePicker,
+        DatePickerInput,
      } from 'carbon-components-svelte';
-     import { addStudent, getStudents, pb } from '$lib/pocketbase';
+     import { addStudent, editStudent, getStudents, pb } from '$lib/pocketbase';
 
     let { data } = $props();
     let fileUploader: FileUploader | null = $state(null);
+    let fileUploaderEdit: FileUploader | null = $state(null);
     let studentData: any = $state([
         {id: 'addStudent', name: 'Add Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
+        {id: 'editStudent', name: 'Edit Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
         ...data.students
     ]);
     let items: Array<{
@@ -63,6 +65,18 @@
         profilePicture: null,
     });
 
+    let selectedEditId: string = $state(items.find(i => i.id !== 'addStudent' && i.id !== 'editStudent')?.id ?? '');
+    let editStudentFormVariables: any = $state({
+        name: '',
+        dateOfBirth: '',
+        email: '',
+        phoneNumber: '',
+        address: '',
+        currentBelt: 'White',
+        earnedBeltDate: formatDateToMMDDYYYY(new Date()),
+        profilePicture: null,
+    });
+
     let selectedId: string = $state('addStudent');
     let selectedStudent: any = $derived(items.find((item) => item.id === selectedId));
     $effect(() => {
@@ -77,7 +91,8 @@
         try {
             await addStudent(addStudentFormVariables);
             studentData = [
-                {id: 'addStudent', name: 'Add Student'},
+                {id: 'addStudent', name: 'Add Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
+                {id: 'editStudent', name: 'Edit Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
                 ...(await getStudents())
             ];
             addStudentFormVariables = {
@@ -88,26 +103,79 @@
                 address: '',
                 currentBelt: 'White',
                 earnedBeltDate: formatDateToMMDDYYYY(new Date()),
-                profilePicture: null,
+                profilePicture: [],
             };
         } catch (error: any) {
             console.error('Error adding student:', error);
         } finally {
         }
     }
+
+    async function handleEditStudentSubmit(event: Event) {
+        event.preventDefault();
+        $state.snapshot(`editStudentFormVariables ${editStudentFormVariables}`);
+        try {
+            await editStudent(editStudentFormVariables.id, editStudentFormVariables);
+            studentData = [
+                {id: 'addStudent', name: 'Add Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
+                {id: 'editStudent', name: 'Edit Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
+                ...(await getStudents())
+            ];
+            editStudentFormVariables = {
+                name: '',
+                dateOfBirth: '',
+                email: '',
+                phoneNumber: '',
+                address: '',
+                currentBelt: 'White',
+                earnedBeltDate: formatDateToMMDDYYYY(new Date()),
+                profilePicture: [],
+            };
+        } catch (error: any) {
+            console.error('Error editing student:', error);
+        } finally {
+        }
+    }
 </script>
 
 <Dropdown
-	titleText="Student"
+	titleText="Profile"
 	bind:selectedId={selectedId}
 	items={items}
 	let:item
-	let:index
 >
 	<div>
 		<strong>{item.text}</strong>
 	</div>
 </Dropdown>
+
+{#if selectedId === 'editStudent'}
+<Dropdown
+    titleText="Student"
+    bind:selectedId={selectedEditId}
+    items={items.filter((item) => item.id !== 'addStudent' && item.id !== 'editStudent')}
+    let:item
+    style="margin-top: 1.5rem;"
+    on:select={(e) => {
+        selectedEditId = e.detail.selectedItem.id;
+        editStudentFormVariables = items.find((item) => item.id === selectedEditId) || {
+            name: '',
+            dateOfBirth: '',
+            email: '',
+            phoneNumber: '',
+            address: '',
+            currentBelt: 'White',
+            earnedBeltDate: formatDateToMMDDYYYY(new Date()),
+            profilePicture: [],
+        };
+        editStudentFormVariables.name = items.find((item) => item.id === selectedEditId)?.text;
+    }}
+    >
+    <div>
+        <strong>{item.text}</strong>
+    </div>
+</Dropdown>
+{/if}
 
 {#if selectedId === 'addStudent'}
 <Grid fullWidth style="margin-top: 1.5rem;">
@@ -138,6 +206,57 @@
                     <FileUploader
                         bind:this={fileUploader}
                         bind:files={addStudentFormVariables.profilePicture}
+                        id="profilePicture"
+                        labelTitle="Profile Picture"
+                        accept={['.jpg', '.png', '.jpeg']}
+                        multiple={false}
+                        name="profilePicture"
+                        status="complete"
+                        buttonLabel="Upload Profile Picture"
+                    >
+                    </FileUploader>
+                </Column>
+            </Row>
+		</FormGroup>
+	</Form>
+</Grid>
+{:else if selectedId === 'editStudent'}
+<Grid fullWidth style="margin-top: 1.5rem;">
+	<Form action="/classes/editclasses" method="POST" on:submit={handleEditStudentSubmit}>
+		<FormGroup>
+			<Row>
+                <Column>
+                    <TextInput bind:value={editStudentFormVariables.name} id="name" labelText="Name" placeholder="Enter name" required />
+                </Column>
+                <Column>
+                    <TextInput bind:value={editStudentFormVariables.dateOfBirth} id="dateOfBirth" labelText="Date of Birth" placeholder="Enter date of birth" required />
+                </Column>
+                <Column>
+                    <TextInput bind:value={editStudentFormVariables.email} id="email" labelText="Email" placeholder="Enter email" required />
+                </Column>
+                <Column>
+                    <TextInput bind:value={editStudentFormVariables.phoneNumber} id="phoneNumber" labelText="Phone Number" placeholder="Enter phone number" required />
+                </Column>
+                <Column>
+                    <TextInput bind:value={editStudentFormVariables.address} id="address" labelText="Address" placeholder="Enter address" required />
+                </Column>
+                <Column>
+                    <Button style="margin-top: 1.5rem;" type="submit">Edit Student</Button>
+                </Column>
+            </Row>
+            <Row style="margin-top: 1rem;">
+                <Column>
+                    <TextInput bind:value={editStudentFormVariables.currentBelt} id="currentBelt" labelText="Current Belt" placeholder="Enter current belt" required />
+                </Column>
+                <Column>
+                    <DatePicker datePickerType="single" bind:value={editStudentFormVariables.earnedBeltDate}>
+                        <DatePickerInput id="earnedBeltDate" placeholder="mm/dd/yyyy" labelText="Earned Belt Date"  />
+                    </DatePicker>
+                </Column>
+                <Column>
+                    <FileUploader
+                        bind:this={fileUploaderEdit}
+                        bind:files={editStudentFormVariables.profilePicture}
                         id="profilePicture"
                         labelTitle="Profile Picture"
                         accept={['.jpg', '.png', '.jpeg']}
