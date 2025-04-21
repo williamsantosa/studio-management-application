@@ -364,6 +364,10 @@ export async function editStudent(studentId: string, studentData: StudentData): 
         }
 
         // Call PocketBase SDK's update method for the 'students' collection
+        if (!studentData.profilePicture) {
+            delete studentData.profilePicture; // Remove the field if not provided
+        }
+        
         const updatedRecord = await pb.collection('students').update(studentId, studentData);
 
         console.log('Student updated successfully:', updatedRecord);

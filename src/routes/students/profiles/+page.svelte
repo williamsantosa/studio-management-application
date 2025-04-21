@@ -74,7 +74,7 @@
         address: '',
         currentBelt: 'White',
         earnedBeltDate: formatDateToMMDDYYYY(new Date()),
-        profilePicture: null,
+        profilePicture: [],
     });
 
     let selectedId: string = $state('addStudent');
@@ -166,9 +166,10 @@
             address: '',
             currentBelt: 'White',
             earnedBeltDate: formatDateToMMDDYYYY(new Date()),
-            profilePicture: [],
+            profilePicture: undefined,
         };
         editStudentFormVariables.name = items.find((item) => item.id === selectedEditId)?.text;
+        editStudentFormVariables.profilePicture = undefined;
     }}
     >
     <div>
