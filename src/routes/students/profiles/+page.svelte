@@ -12,12 +12,12 @@
         FileUploader,
         FileUploaderItem,
      } from 'carbon-components-svelte';
-     import { addStudent, getStudents } from '$lib/pocketbase';
+     import { addStudent, getStudents, pb } from '$lib/pocketbase';
 
     let { data } = $props();
     let fileUploader: FileUploader | null = $state(null);
-    let studentData = $state([
-        {id: 'addStudent', name: 'Add Student'},
+    let studentData: any = $state([
+        {id: 'addStudent', name: 'Add Student', dateOfBirth: '', email: '', phoneNumber: '', address: '', currentBelt: 'White', earnedBeltDate: '', profilePicture: null},
         ...data.students
     ]);
     let items: Array<{
@@ -67,7 +67,8 @@
     let selectedStudent: any = $derived(items.find((item) => item.id === selectedId));
     $effect(() => {
         console.log('Selected student:', selectedStudent);
-        console.log('studentData:', studentData.find((item => item.id === selectedId)));
+        $state.snapshot(`studentData: ${studentData.find(((item: any) => item.id === selectedId))}`);
+        console.log(items);
     });
 
     async function handleAddStudentSubmit(event: Event) {
@@ -159,6 +160,18 @@
 <p style="margin-top: 1rem">Address: {selectedStudent.address}</p>
 <p style="margin-top: 1rem">Current Belt: {selectedStudent.currentBelt}</p>
 <p style="margin-top: 1rem">Earned Belt Date: {selectedStudent.earnedBeltDate}</p>
+{#if selectedStudent.profilePicture && selectedStudent.profilePicture.length > 0}
+    <img 
+    src={pb.files.getURL(
+        studentData.find((s: any) => s.id === selectedStudent.id),
+        selectedStudent.profilePicture
+        )}
+    alt=""
+    style="margin-top: 1rem; width: 100px; height: 100px;" 
+    />
+{:else}
+    <p style="margin-top: 1rem">No profile picture available</p>
+{/if}
 {/if}
 <style>
 	:global(.bx--list-box__menu-item, .bx--list-box__menu-item__option) {
