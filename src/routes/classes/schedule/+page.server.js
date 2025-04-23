@@ -1,7 +1,7 @@
-import { getClassesStartingOn } from '$lib/pocketbase';
+import { getClassesStartingOn, formatDateToMMDDYYYY } from '$lib/pocketbase';
 
 export async function load() {
     return {
-        todayClasses: await getClassesStartingOn(new Date())
+        todayClasses: await getClassesStartingOn(formatDateToMMDDYYYY(new Date()))
     };
 }

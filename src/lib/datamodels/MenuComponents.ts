@@ -8,8 +8,8 @@ export const MenuComponents: Array<{
         text: 'Students',
         components: [
             { text: 'Profiles', href: '/students/profiles' },
-            { text: 'Leadership', href: '/students/leadership' },
-            { text: 'Tournaments', href: '/students/tournaments' },
+            // { text: 'Leadership', href: '/students/leadership' },
+            // { text: 'Tournaments', href: '/students/tournaments' },
             { text: 'Add Missing Class', href: '/students/addmissingclass' }
         ]
     },
